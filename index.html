@@ -1911,6 +1911,10 @@
             );
             
             console.log('Пользователей с игрой', gameName, ':', usersWithGame.length);
+            console.log('Все игры у пользователей:');
+            allUsersData.forEach(user => {
+                console.log('Пользователь', user.displayName, 'игры:', user.games.map(g => g.name));
+            });
             usersWithGame.forEach(user => {
                 const game = user.games.find(g => g.name === gameName);
                 console.log('Пользователь', user.displayName, 'игра:', game?.name);
@@ -1932,6 +1936,13 @@
                 const legendaryPulls = game.banners.reduce((sum, b) => 
                     sum + b.pulls.filter(p => p.type === 'character' || p.type === 'weapon').length, 0
                 );
+                
+                console.log('Детали расчета для', user.displayName, ':');
+                game.banners.forEach(banner => {
+                    console.log('Баннер', banner.type, ':', banner.pulls.length, 'круток');
+                    const legendaryInBanner = banner.pulls.filter(p => p.type === 'character' || p.type === 'weapon').length;
+                    console.log('Легендарных в баннере:', legendaryInBanner);
+                });
                 const avgLegendary = legendaryPulls > 0 ? (totalPulls / legendaryPulls).toFixed(1) : 0;
                 
                 // Рассчитываем дополнительные статистики
