@@ -1423,7 +1423,7 @@
             <h3>Добавить новую игру</h3>
             <div class="preset-games">
                 <button type="button" class="preset-game-btn" onclick="selectPresetGame('Zenless Zone Zero')">ZZZ</button>
-                <button type="button" class="preset-game-btn" onclick="selectPresetGame('Girls\' Frontline 2')">GFL2</button>
+                <button type="button" class="preset-game-btn" onclick="selectPresetGame('Girls Frontline 2')">GFL2</button>
                 <button type="button" class="preset-game-btn" onclick="selectPresetGame('Genshin Impact')">Genshin</button>
             </div>
             <div class="form-group">
@@ -1900,26 +1900,16 @@
             // Фильтруем пользователей с данными по этой игре
             const gameName = {
                 'zzz': 'Zenless Zone Zero',
-                'gfl2': 'Girls\' Frontline 2: Exilium',
+                'gfl2': 'Girls Frontline 2',
                 'genshin': 'Genshin Impact'
             }[gameType];
             
             console.log('Ищем игру:', gameName);
             
-            // Для GFL2 ищем оба варианта названия
-            let usersWithGame;
-            if (gameType === 'gfl2') {
-                usersWithGame = allUsersData.filter(user => 
-                    user.games.some(game => 
-                        game.name === 'Girls\' Frontline 2: Exilium' || 
-                        game.name === 'Girls\' Frontline 2'
-                    )
-                );
-            } else {
-                usersWithGame = allUsersData.filter(user => 
-                    user.games.some(game => game.name === gameName)
-                );
-            }
+            // Ищем пользователей с игрой
+            const usersWithGame = allUsersData.filter(user => 
+                user.games.some(game => game.name === gameName)
+            );
             
             console.log('Пользователей с игрой', gameName, ':', usersWithGame.length);
             console.log('Все игры у пользователей:');
@@ -1938,56 +1928,30 @@
             
             // Рассчитываем статистику для каждого пользователя
             const userStats = usersWithGame.map(user => {
-                let game;
-                if (gameType === 'gfl2') {
-                    game = user.games.find(g => 
-                        g.name === 'Girls\' Frontline 2: Exilium' || 
-                        g.name === 'Girls\' Frontline 2'
-                    );
-                } else {
-                    game = user.games.find(g => g.name === gameName);
-                }
-                
+                const game = user.games.find(g => g.name === gameName);
                 if (!game) return null;
                 
                 console.log('Обрабатываем игру для пользователя', user.displayName, ':', game);
                 
+                // Используем те же функции, что и в сравнении
                 const totalPulls = game.banners.reduce((sum, b) => sum + b.pulls.length, 0);
-                
-                // Считаем легендарными только те крутки, которые действительно легендарные
-                // (имеют результат 'win', 'lose' или 'guarantee')
                 const legendaryPulls = game.banners.reduce((sum, b) => 
-                    sum + b.pulls.filter(p => p.result === 'win' || p.result === 'lose' || p.result === 'guarantee').length, 0
+                    sum + b.pulls.filter(p => p.type === 'character' || p.type === 'weapon').length, 0
                 );
-                
-                console.log('Детали расчета для', user.displayName, ':');
-                game.banners.forEach(banner => {
-                    console.log('Баннер', banner.type, ':', banner.pulls.length, 'круток');
-                    const legendaryInBanner = banner.pulls.filter(p => p.result === 'win' || p.result === 'lose' || p.result === 'guarantee').length;
-                    console.log('Легендарных в баннере:', legendaryInBanner);
-                });
                 const avgLegendary = legendaryPulls > 0 ? (totalPulls / legendaryPulls).toFixed(1) : 0;
                 
-                // Рассчитываем дополнительные статистики
+                // Ранние крутки (до 10-го)
                 const earlyPulls = game.banners.reduce((sum, b) => 
                     sum + b.pulls.filter(p => p.count <= 10).length, 0
                 );
                 const earlyRate = totalPulls > 0 ? ((earlyPulls / totalPulls) * 100).toFixed(1) : 0;
                 
-                // Рассчитываем статистики по баннерам
-                const eventBanner = game.banners.find(b => b.type === 'event');
-                const weaponBanner = game.banners.find(b => b.type === 'weapon');
-                const standardBanner = game.banners.find(b => b.type === 'standard');
+                // Самый ранний и поздний пул
+                const allPulls = game.banners.flatMap(b => b.pulls);
+                const earliestPull = allPulls.length > 0 ? Math.min(...allPulls.map(p => p.count)) : 0;
+                const latestPull = allPulls.length > 0 ? Math.max(...allPulls.map(p => p.count)) : 0;
                 
-                const eventWins = eventBanner ? eventBanner.pulls.filter(p => p.result === 'win').length : 0;
-                const eventTotal = eventBanner ? eventBanner.pulls.filter(p => p.result === 'win' || p.result === 'lose').length : 0;
-                const eventWinRate = eventTotal > 0 ? ((eventWins / eventTotal) * 100).toFixed(1) : 0;
-                
-                const weaponWins = weaponBanner ? weaponBanner.pulls.filter(p => p.result === 'win').length : 0;
-                const weaponTotal = weaponBanner ? weaponBanner.pulls.filter(p => p.result === 'win' || p.result === 'lose').length : 0;
-                const weaponWinRate = weaponTotal > 0 ? ((weaponWins / weaponTotal) * 100).toFixed(1) : 0;
-                
-                // Рассчитываем коэффициент удачи
+                // Коэффициент удачи
                 const luckScore = calculateLuckScore(game);
                 
                 console.log('Статистика для', user.displayName, ':', {
@@ -1995,8 +1959,8 @@
                     legendaryPulls,
                     avgLegendary,
                     earlyRate,
-                    eventWinRate,
-                    weaponWinRate,
+                    earliestPull,
+                    latestPull,
                     luckScore
                 });
                 
@@ -2005,10 +1969,9 @@
                     totalPulls,
                     legendaryPulls,
                     avgLegendary,
-                    earlyPulls,
                     earlyRate,
-                    eventWinRate,
-                    weaponWinRate,
+                    earliestPull,
+                    latestPull,
                     luckScore
                 };
             }).filter(Boolean);
@@ -2032,13 +1995,13 @@
             const earlyRateSorted = [...userStats].sort((a, b) => parseFloat(b.earlyRate) - parseFloat(a.earlyRate));
             html += createStatisticSection('Ранние крутки (%)', earlyRateSorted, 'earlyRate');
             
-            // 5. Победы в ивентах
-            const eventWinRateSorted = [...userStats].sort((a, b) => parseFloat(b.eventWinRate) - parseFloat(a.eventWinRate));
-            html += createStatisticSection('Победы в ивентах (%)', eventWinRateSorted, 'eventWinRate');
+            // 5. Самый ранний пул
+            const earliestPullSorted = [...userStats].sort((a, b) => a.earliestPull - b.earliestPull);
+            html += createStatisticSection('Самый ранний пул', earliestPullSorted, 'earliestPull');
             
-            // 6. Победы в оружии
-            const weaponWinRateSorted = [...userStats].sort((a, b) => parseFloat(b.weaponWinRate) - parseFloat(a.weaponWinRate));
-            html += createStatisticSection('Победы в оружии (%)', weaponWinRateSorted, 'weaponWinRate');
+            // 6. Самый поздний пул
+            const latestPullSorted = [...userStats].sort((a, b) => b.latestPull - a.latestPull);
+            html += createStatisticSection('Самый поздний пул', latestPullSorted, 'latestPull');
             
             // 7. Коэффициент удачи
             const luckScoreSorted = [...userStats].sort((a, b) => b.luckScore - a.luckScore);
@@ -3296,7 +3259,7 @@
         });
 
         // Автосохранение при изменениях
-        setInterval(saveData, 30000); // Автосохранение каждые 30 секунд
+        		// Убираем автосохранение по интервалу - теперь сохраняем после каждого изменения
 		
 		// Регистрация Service Worker для PWA
 		async function registerServiceWorker() {
