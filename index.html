@@ -1705,6 +1705,9 @@
                 return;
             }
             
+            // Сбрасываем CSS класс контейнера для правильного отображения
+            container.className = 'stats-container';
+            
             container.innerHTML = '';
             
             if (selectedUser) {
@@ -1864,6 +1867,9 @@
         function showUserStats(user) {
             const container = document.getElementById('statsContainer');
             
+            // Сбрасываем CSS класс контейнера для правильного отображения
+            container.className = 'stats-container';
+            
             // Показываем элементы управления
             document.querySelector('.header-controls').style.display = 'flex';
             
@@ -1934,7 +1940,9 @@
                 console.log('Обрабатываем игру для пользователя', user.displayName, ':', game);
                 
                 // Используем те же функции, что и в сравнении
-                const totalPulls = game.banners.reduce((sum, b) => sum + b.pulls.length, 0);
+                const totalPulls = game.banners.reduce((sum, b) => 
+                    sum + b.pulls.reduce((bannerSum, pull) => bannerSum + pull.count, 0), 0
+                );
                 const legendaryPulls = game.banners.reduce((sum, b) => 
                     sum + b.pulls.filter(p => p.type === 'character' || p.type === 'weapon').length, 0
                 );
@@ -1951,6 +1959,26 @@
                 const earliestPull = allPulls.length > 0 ? Math.min(...allPulls.map(p => p.count)) : 0;
                 const latestPull = allPulls.length > 0 ? Math.max(...allPulls.map(p => p.count)) : 0;
                 
+                // Статистика ивентового баннера
+                const eventBanner = game.banners.find(b => b.type === 'event');
+                let eventWinRate = 0;
+                let eventStreaks = { maxWinStreak: 0, maxLoseStreak: 0 };
+                if (eventBanner) {
+                    const eventPulls = eventBanner.pulls.filter(p => p.eventResult && p.eventResult !== 'guarantee');
+                    const wins = eventPulls.filter(p => p.eventResult === 'win').length;
+                    eventWinRate = eventPulls.length > 0 ? wins / eventPulls.length * 100 : 0;
+                    eventStreaks = calculateStreaks(eventBanner.pulls);
+                }
+
+                // Статистика оружейного баннера
+                const weaponBanner = game.banners.find(b => b.type === 'weapon');
+                let weaponWinRate = 0;
+                if (weaponBanner) {
+                    const weaponPulls = weaponBanner.pulls.filter(p => p.eventResult && p.eventResult !== 'guarantee');
+                    const wins = weaponPulls.filter(p => p.eventResult === 'win').length;
+                    weaponWinRate = weaponPulls.length > 0 ? wins / weaponPulls.length * 100 : 0;
+                }
+                
                 // Коэффициент удачи
                 const luckScore = calculateLuckScore(game);
                 
@@ -1961,6 +1989,9 @@
                     earlyRate,
                     earliestPull,
                     latestPull,
+                    eventWinRate,
+                    weaponWinRate,
+                    eventStreaks,
                     luckScore
                 });
                 
@@ -1972,6 +2003,9 @@
                     earlyRate,
                     earliestPull,
                     latestPull,
+                    eventWinRate,
+                    weaponWinRate,
+                    eventStreaks,
                     luckScore
                 };
             }).filter(Boolean);
@@ -2003,7 +2037,23 @@
             const latestPullSorted = [...userStats].sort((a, b) => b.latestPull - a.latestPull);
             html += createStatisticSection('Самый поздний пул', latestPullSorted, 'latestPull');
             
-            // 7. Коэффициент удачи
+            // 7. Победы в ивентах
+            const eventWinRateSorted = [...userStats].sort((a, b) => b.eventWinRate - a.eventWinRate);
+            html += createStatisticSection('Победы в ивентах (%)', eventWinRateSorted, 'eventWinRate');
+            
+            // 8. Победы в оружии
+            const weaponWinRateSorted = [...userStats].sort((a, b) => b.weaponWinRate - a.weaponWinRate);
+            html += createStatisticSection('Победы в оружии (%)', weaponWinRateSorted, 'weaponWinRate');
+            
+            // 9. Серия побед
+            const winStreakSorted = [...userStats].sort((a, b) => b.eventStreaks.maxWinStreak - a.eventStreaks.maxWinStreak);
+            html += createStatisticSection('Серия побед', winStreakSorted, 'eventStreaks.maxWinStreak');
+            
+            // 10. Серия поражений
+            const loseStreakSorted = [...userStats].sort((a, b) => a.eventStreaks.maxLoseStreak - b.eventStreaks.maxLoseStreak);
+            html += createStatisticSection('Серия поражений', loseStreakSorted, 'eventStreaks.maxLoseStreak');
+            
+            // 11. Коэффициент удачи
             const luckScoreSorted = [...userStats].sort((a, b) => b.luckScore - a.luckScore);
             html += createStatisticSection('Коэффициент удачи', luckScoreSorted, 'luckScore');
             
