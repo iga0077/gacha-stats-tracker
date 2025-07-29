@@ -1052,6 +1052,7 @@
             justify-content: center;
             flex-wrap: wrap;
             padding: 20px;
+            width: 100%;
         }
 
         .global-tab {
@@ -1124,12 +1125,14 @@
             border-radius: 12px;
             padding: 15px 20px;
             margin-bottom: 20px;
+            width: 100%;
         }
 
         .selected-user-center {
             display: flex;
             align-items: center;
             gap: 15px;
+            text-align: center;
         }
 
         .selected-user-info .user-avatar {
@@ -1897,7 +1900,7 @@
             // Фильтруем пользователей с данными по этой игре
             const gameName = {
                 'zzz': 'Zenless Zone Zero',
-                'gfl2': 'Girls\' Frontline 2',
+                'gfl2': 'Girls\' Frontline 2: Exilium',
                 'genshin': 'Genshin Impact'
             }[gameType];
             
@@ -1923,6 +1926,8 @@
                 const game = user.games.find(g => g.name === gameName);
                 if (!game) return null;
                 
+                console.log('Обрабатываем игру для пользователя', user.displayName, ':', game);
+                
                 const totalPulls = game.banners.reduce((sum, b) => sum + b.pulls.length, 0);
                 const legendaryPulls = game.banners.reduce((sum, b) => 
                     sum + b.pulls.filter(p => p.type === 'character' || p.type === 'weapon').length, 0
@@ -1935,8 +1940,31 @@
                 );
                 const earlyRate = totalPulls > 0 ? ((earlyPulls / totalPulls) * 100).toFixed(1) : 0;
                 
+                // Рассчитываем статистики по баннерам
+                const eventBanner = game.banners.find(b => b.type === 'event');
+                const weaponBanner = game.banners.find(b => b.type === 'weapon');
+                const standardBanner = game.banners.find(b => b.type === 'standard');
+                
+                const eventWins = eventBanner ? eventBanner.pulls.filter(p => p.result === 'win').length : 0;
+                const eventTotal = eventBanner ? eventBanner.pulls.filter(p => p.result === 'win' || p.result === 'lose').length : 0;
+                const eventWinRate = eventTotal > 0 ? ((eventWins / eventTotal) * 100).toFixed(1) : 0;
+                
+                const weaponWins = weaponBanner ? weaponBanner.pulls.filter(p => p.result === 'win').length : 0;
+                const weaponTotal = weaponBanner ? weaponBanner.pulls.filter(p => p.result === 'win' || p.result === 'lose').length : 0;
+                const weaponWinRate = weaponTotal > 0 ? ((weaponWins / weaponTotal) * 100).toFixed(1) : 0;
+                
                 // Рассчитываем коэффициент удачи
                 const luckScore = calculateLuckScore(game);
+                
+                console.log('Статистика для', user.displayName, ':', {
+                    totalPulls,
+                    legendaryPulls,
+                    avgLegendary,
+                    earlyRate,
+                    eventWinRate,
+                    weaponWinRate,
+                    luckScore
+                });
                 
                 return {
                     user,
@@ -1945,6 +1973,8 @@
                     avgLegendary,
                     earlyPulls,
                     earlyRate,
+                    eventWinRate,
+                    weaponWinRate,
                     luckScore
                 };
             }).filter(Boolean);
@@ -1968,7 +1998,15 @@
             const earlyRateSorted = [...userStats].sort((a, b) => parseFloat(b.earlyRate) - parseFloat(a.earlyRate));
             html += createStatisticSection('Ранние крутки (%)', earlyRateSorted, 'earlyRate');
             
-            // 5. Коэффициент удачи
+            // 5. Победы в ивентах
+            const eventWinRateSorted = [...userStats].sort((a, b) => parseFloat(b.eventWinRate) - parseFloat(a.eventWinRate));
+            html += createStatisticSection('Победы в ивентах (%)', eventWinRateSorted, 'eventWinRate');
+            
+            // 6. Победы в оружии
+            const weaponWinRateSorted = [...userStats].sort((a, b) => parseFloat(b.weaponWinRate) - parseFloat(a.weaponWinRate));
+            html += createStatisticSection('Победы в оружии (%)', weaponWinRateSorted, 'weaponWinRate');
+            
+            // 7. Коэффициент удачи
             const luckScoreSorted = [...userStats].sort((a, b) => b.luckScore - a.luckScore);
             html += createStatisticSection('Коэффициент удачи', luckScoreSorted, 'luckScore');
             
@@ -1984,8 +2022,15 @@
             
             sortedStats.forEach((stat, index) => {
                 const trophy = index < 3 ? ['🏆', '🥈', '🥉'][index] : '';
-                const value = field === 'avgLegendary' || field === 'earlyRate' ? 
-                    stat[field] : Math.round(stat[field]);
+                let value;
+                
+                if (field === 'avgLegendary' || field === 'earlyRate' || field === 'eventWinRate' || field === 'weaponWinRate') {
+                    value = stat[field];
+                } else if (field === 'luckScore') {
+                    value = Math.round(stat[field]);
+                } else {
+                    value = Math.round(stat[field]);
+                }
                 
                 html += `
                     <div class="stat-user-row">
