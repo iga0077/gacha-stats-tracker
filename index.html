@@ -1619,10 +1619,10 @@
         // Показать глобальную статистику
         function showGlobalStats() {
             console.log('Показываем глобальную статистику...');
-            const container = document.getElementById('container');
+            const container = document.getElementById('statsContainer');
             
             if (!container) {
-                console.error('Контейнер не найден!');
+                console.error('Контейнер statsContainer не найден!');
                 return;
             }
             
@@ -1640,7 +1640,7 @@
         // Показать список пользователей
         function showGlobalUsersList() {
             console.log('Показываем список пользователей...');
-            const container = document.getElementById('container');
+            const container = document.getElementById('statsContainer');
             
             console.log('Контейнер найден:', !!container);
             if (container) {
@@ -1648,7 +1648,7 @@
             }
             
             if (!container) {
-                console.error('Контейнер не найден!');
+                console.error('Контейнер statsContainer не найден!');
                 return;
             }
             
@@ -1783,7 +1783,7 @@
 
         // Показать статистику пользователя
         function showUserStats(user) {
-            const container = document.getElementById('container');
+            const container = document.getElementById('statsContainer');
             
             // Показываем элементы управления
             document.querySelector('.header-controls').style.display = 'flex';
