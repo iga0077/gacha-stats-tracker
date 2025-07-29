@@ -1607,7 +1607,12 @@
                 showGlobalStats();
             } catch (error) {
                 console.error('Ошибка загрузки глобальной статистики:', error);
-                alert('Ошибка загрузки глобальной статистики: ' + error.message);
+                
+                if (error.message.includes('permissions')) {
+                    alert('Ошибка доступа к данным. Проверьте правила безопасности Firebase.');
+                } else {
+                    alert('Ошибка загрузки глобальной статистики: ' + error.message);
+                }
             }
         }
 
@@ -1637,6 +1642,11 @@
             console.log('Показываем список пользователей...');
             const container = document.getElementById('container');
             
+            console.log('Контейнер найден:', !!container);
+            if (container) {
+                console.log('Текущий HTML контейнера:', container.innerHTML.substring(0, 200) + '...');
+            }
+            
             if (!container) {
                 console.error('Контейнер не найден!');
                 return;
@@ -1644,8 +1654,10 @@
             
             // Скрываем элементы управления
             const headerControls = document.querySelector('.header-controls');
+            console.log('Элементы управления найдены:', !!headerControls);
             if (headerControls) {
                 headerControls.style.display = 'none';
+                console.log('Элементы управления скрыты');
             }
             
             // Создаем вкладки
@@ -1658,9 +1670,18 @@
                 </div>
             `;
             
-            container.innerHTML = tabsHtml + '<div id="globalContent"></div>';
+            const newHtml = tabsHtml + '<div id="globalContent"></div>';
+            console.log('Новый HTML:', newHtml);
+            
+            container.innerHTML = newHtml;
             
             console.log('HTML добавлен в контейнер');
+            console.log('Новый HTML контейнера:', container.innerHTML.substring(0, 200) + '...');
+            
+            // Проверяем, что globalContent создался
+            const globalContent = document.getElementById('globalContent');
+            console.log('globalContent создан:', !!globalContent);
+            
             switchGlobalTab('users');
         }
 
@@ -1670,14 +1691,20 @@
             currentGlobalView = tab;
             
             // Обновляем активную вкладку
-            document.querySelectorAll('.global-tab').forEach(btn => {
+            const tabs = document.querySelectorAll('.global-tab');
+            console.log('Найдено вкладок:', tabs.length);
+            tabs.forEach(btn => {
                 btn.classList.remove('active');
             });
-            event.target.classList.add('active');
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
             
             if (tab === 'users') {
+                console.log('Вызываем showUsersList');
                 showUsersList();
             } else {
+                console.log('Вызываем showGameComparison');
                 showGameComparison(tab);
             }
         }
