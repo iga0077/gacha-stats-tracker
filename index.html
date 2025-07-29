@@ -1,0 +1,2497 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Gacha Stats Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: #e0e0e0;
+            min-height: 100vh;
+            overflow-x: auto;
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: rgba(20, 20, 40, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #333;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            gap: 20px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .header-control {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .header-control label {
+            color: #4a90e2;
+            font-weight: bold;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        .header-control select {
+            background: rgba(30, 30, 50, 0.8);
+            color: #e0e0e0;
+            border: 1px solid #4a90e2;
+            padding: 6px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            min-width: 100px;
+        }
+
+        .settings-btn {
+            background: linear-gradient(45deg, #4a90e2, #357abd);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .settings-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(74, 144, 226, 0.4);
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -300px;
+            width: 300px;
+            height: 100vh;
+            background: rgba(15, 15, 30, 0.95);
+            backdrop-filter: blur(10px);
+            transition: left 0.3s ease;
+            z-index: 1001;
+            padding: 20px;
+            border-right: 1px solid #333;
+            overflow-y: auto;
+        }
+
+        .sidebar.open {
+            left: 0;
+        }
+
+        .sidebar h3 {
+            color: #4a90e2;
+            margin-bottom: 20px;
+            padding-top: 40px;
+        }
+
+        .sidebar-btn {
+            width: 100%;
+            background: linear-gradient(45deg, #2c3e50, #34495e);
+            color: white;
+            border: none;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .sidebar-btn:hover {
+            background: linear-gradient(45deg, #34495e, #2c3e50);
+            transform: translateX(5px);
+        }
+
+        .sidebar-btn.danger {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+        }
+
+        .sidebar-btn.danger:hover {
+            background: linear-gradient(45deg, #c0392b, #e74c3c);
+        }
+
+        .sidebar-btn.success {
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+        }
+
+        .sidebar-btn.success:hover {
+            background: linear-gradient(45deg, #2ecc71, #27ae60);
+        }
+
+        .main-content {
+            margin-top: 80px;
+            padding: 20px;
+            min-height: calc(100vh - 80px);
+        }
+
+        .stats-container {
+            display: grid;
+            gap: 30px;
+        }
+
+        .stats-container.one-game {
+            grid-template-columns: 1fr;
+        }
+
+        .stats-container.two-games {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .stats-container.three-games {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .game-stats {
+            background: rgba(20, 20, 40, 0.8);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid #333;
+        }
+
+        .game-title {
+            font-size: 24px;
+            color: #4a90e2;
+            margin-bottom: 20px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            position: relative;
+        }
+
+        .game-title-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .game-title-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .game-actions {
+            display: flex;
+            gap: 8px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .game-title:hover .game-actions {
+            opacity: 1;
+        }
+
+        .game-action-btn {
+            background: rgba(74, 144, 226, 0.7);
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .game-action-btn:hover {
+            background: rgba(74, 144, 226, 1);
+            transform: translateY(-1px);
+        }
+
+        .game-action-btn.delete {
+            background: rgba(231, 76, 60, 0.7);
+        }
+
+        .game-action-btn.delete:hover {
+            background: rgba(231, 76, 60, 1);
+        }
+
+        .overall-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: rgba(30, 30, 50, 0.6);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid #444;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #4a90e2;
+        }
+
+        .stat-label {
+            color: #aaa;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .banners-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
+        }
+
+        .banner {
+            background: rgba(25, 25, 45, 0.8);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #444;
+        }
+
+        .banner-title {
+            font-size: 18px;
+            color: #4a90e2;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .banner-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .banner-stat {
+            background: rgba(40, 40, 60, 0.8);
+            padding: 8px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 11px;
+        }
+
+        .add-pull-btn {
+            width: 100%;
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .add-pull-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4);
+        }
+
+        .pulls-list {
+            min-height: 50px;
+        }
+
+        .pull-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            background: rgba(40, 40, 60, 0.6);
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .pull-item:hover {
+            background: rgba(50, 50, 70, 0.8);
+        }
+
+        .pull-item:hover .pull-actions {
+            opacity: 1;
+            width: auto;
+            margin-left: 10px;
+        }
+
+        .pull-number {
+            font-weight: bold;
+            color: #666;
+            margin-right: 10px;
+            min-width: 25px;
+        }
+
+        .pull-name {
+            flex: 1;
+            font-weight: bold;
+            margin-left: 5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .pull-actions {
+            display: flex;
+            gap: 5px;
+            opacity: 0;
+            width: 0;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .pull-action-btn {
+            background: rgba(74, 144, 226, 0.7);
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .pull-action-btn:hover {
+            background: rgba(74, 144, 226, 1);
+        }
+
+        .pull-action-btn.delete {
+            background: rgba(231, 76, 60, 0.7);
+        }
+
+        .pull-action-btn.delete:hover {
+            background: rgba(231, 76, 60, 1);
+        }
+
+        .pull-count {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            min-width: 40px;
+            text-align: center;
+        }
+
+        .pull-type {
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: bold;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        .character { color: #ffa500; }
+        .weapon { color: #4a90e2; }
+        .win { background: #27ae60; color: white; }
+        .lose { background: #e74c3c; color: white; }
+        .guarantee { background: #f39c12; color: white; }
+
+        .good { background: #27ae60; }
+        .average { background: #f39c12; }
+        .bad { background: #e74c3c; }
+
+        /* Стили для коэффициента удачи */
+        .luck-score {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            justify-content: center;
+            background: transparent;
+        }
+
+        .luck-score-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .luck-score.excellent .luck-score-circle {
+            background: #27ae60;
+        }
+
+        .luck-score.good .luck-score-circle {
+            background: #2ecc71;
+        }
+
+        .luck-score.average .luck-score-circle {
+            background: #f39c12;
+        }
+
+        .luck-score.bad .luck-score-circle {
+            background: #e74c3c;
+        }
+
+        .luck-score-text {
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .luck-score.excellent .luck-score-text {
+            color: #27ae60;
+        }
+
+        .luck-score.good .luck-score-text {
+            color: #2ecc71;
+        }
+
+        .luck-score.average .luck-score-text {
+            color: #f39c12;
+        }
+
+        .luck-score.bad .luck-score-text {
+            color: #e74c3c;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(20, 20, 40, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            border: 1px solid #444;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal h3 {
+            color: #4a90e2;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #e0e0e0;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            background: rgba(30, 30, 50, 0.8);
+            color: #e0e0e0;
+            border: 1px solid #4a90e2;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .form-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #4a90e2, #357abd);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(45deg, #6c757d, #545b62);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+        .overlay.show {
+            display: block;
+        }
+
+        .banner-setup {
+            margin-bottom: 20px;
+        }
+
+        .banner-setup h4 {
+            color: #4a90e2;
+            margin-bottom: 15px;
+        }
+
+        .banner-config {
+            background: rgba(30, 30, 50, 0.6);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .banner-config-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .banner-config-header input[type="checkbox"] {
+            width: auto;
+        }
+
+        .guarantee-input {
+            margin-top: 10px;
+        }
+
+        .no-games {
+            text-align: center;
+            color: #aaa;
+            font-size: 18px;
+            margin-top: 50px;
+        }
+
+        .comparison-view {
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .comparison-title {
+            font-size: 28px;
+            color: #4a90e2;
+            margin-bottom: 30px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .comparison-games {
+            display: grid;
+            gap: 30px;
+        }
+
+        .comparison-games.one-game {
+            grid-template-columns: 1fr;
+        }
+
+        .comparison-games.two-games {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .comparison-games.three-games {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .comparison-game {
+            background: rgba(20, 20, 40, 0.8);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid #333;
+            position: relative;
+        }
+
+        .comparison-game-title {
+            font-size: 24px;
+            color: #4a90e2;
+            margin-bottom: 25px;
+            text-align: center;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .comparison-luck-score {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 25px;
+            justify-content: center;
+            background: transparent;
+        }
+
+        .comparison-luck-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .comparison-luck-score.excellent .comparison-luck-circle {
+            background: #27ae60;
+        }
+
+        .comparison-luck-score.good .comparison-luck-circle {
+            background: #2ecc71;
+        }
+
+        .comparison-luck-score.average .comparison-luck-circle {
+            background: #f39c12;
+        }
+
+        .comparison-luck-score.bad .comparison-luck-circle {
+            background: #e74c3c;
+        }
+
+        .comparison-luck-text {
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .comparison-luck-score.excellent .comparison-luck-text {
+            color: #27ae60;
+        }
+
+        .comparison-luck-score.good .comparison-luck-text {
+            color: #2ecc71;
+        }
+
+        .comparison-luck-score.average .comparison-luck-text {
+            color: #f39c12;
+        }
+
+        .comparison-luck-score.bad .comparison-luck-text {
+            color: #e74c3c;
+        }
+
+        .comparison-overall-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .comparison-stat-card {
+            background: rgba(30, 30, 50, 0.6);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid #444;
+            position: relative;
+        }
+
+        .comparison-stat-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #4a90e2;
+            margin-bottom: 5px;
+        }
+
+        .comparison-stat-label {
+            color: #aaa;
+            font-size: 12px;
+        }
+
+        .comparison-stat-card.best {
+            background: rgba(39, 174, 96, 0.3) !important;
+            border: 1px solid #2ecc71;
+        }
+
+        .comparison-stat-card.best .comparison-stat-value {
+            color: #2ecc71;
+        }
+
+        .comparison-stat-card.worst {
+            background: rgba(231, 76, 60, 0.3) !important;
+            border: 1px solid #e74c3c;
+        }
+
+        .comparison-stat-card.worst .comparison-stat-value {
+            color: #e74c3c;
+        }
+
+        .comparison-summary {
+            background: rgba(25, 25, 45, 0.8);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 30px;
+            border: 1px solid #444;
+        }
+
+        .comparison-summary-title {
+            font-size: 18px;
+            color: #4a90e2;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .comparison-summary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .comparison-summary-stat {
+            background: rgba(40, 40, 60, 0.8);
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .comparison-summary-value {
+            font-size: 16px;
+            font-weight: bold;
+            color: #4a90e2;
+            margin-bottom: 5px;
+        }
+
+        .comparison-summary-label {
+            color: #aaa;
+            font-size: 11px;
+        }
+
+        @media (max-width: 1200px) {
+            .stats-container.three-games {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .stats-container.two-games,
+            .stats-container.three-games {
+                grid-template-columns: 1fr;
+            }
+            
+            .overall-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .banners-container {
+                grid-template-columns: 1fr;
+            }
+
+            .header-controls {
+                display: none;
+            }
+
+            .header {
+                justify-content: space-between;
+            }
+
+            .header-right {
+                gap: 10px;
+            }
+
+            .user-name {
+                display: none;
+            }
+
+            .comparison-games.two-games,
+            .comparison-games.three-games {
+                grid-template-columns: 1fr;
+            }
+
+            .comparison-overall-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .comparison-summary-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .luck-score {
+                flex-direction: column;
+                text-align: center;
+                gap: 10px;
+            }
+
+            .luck-score-value {
+                font-size: 24px;
+            }
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .file-input-label {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .file-input-label:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4);
+        }
+
+        /* Стили для авторизации */
+        .auth-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .auth-container {
+            background: rgba(20, 20, 40, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            border: 1px solid #333;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .auth-container h1 {
+            color: #4a90e2;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .auth-container p {
+            color: #aaa;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+
+        .google-signin-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: white;
+            color: #333;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .google-signin-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .google-signin-btn img {
+            width: 20px;
+            height: 20px;
+        }
+
+        .app-content {
+            min-height: 100vh;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid #4a90e2;
+        }
+
+        .user-name {
+            color: #e0e0e0;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .signout-btn {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .signout-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 10px rgba(231, 76, 60, 0.4);
+        }
+    </style>
+	<!-- Firebase SDK -->
+	<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <!-- Экран авторизации -->
+    <div id="authScreen" class="auth-screen">
+        <div class="auth-container">
+            <h1>🎮 Gacha Stats Tracker</h1>
+            <p>Отслеживайте статистику ваших гача игр</p>
+            <button id="googleSignInBtn" class="google-signin-btn">
+                <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google">
+                Войти через Google
+            </button>
+        </div>
+    </div>
+
+    <!-- Основное приложение -->
+    <div id="appContent" class="app-content" style="display: none;">
+        <div class="header">
+            <div class="header-left">
+                <button class="settings-btn" onclick="toggleSidebar()">⚙️</button>
+            </div>
+            <div class="header-controls">
+                <div class="header-control">
+                    <label for="viewMode">Режим:</label>
+                    <select id="viewMode" onchange="updateViewMode()">
+                        <option value="stats">Статистика</option>
+                        <option value="comparison">Сравнение</option>
+                    </select>
+                </div>
+                <div class="header-control" id="gameCountControl">
+                    <label for="gameCount">Игр:</label>
+                    <select id="gameCount" onchange="updateStats()">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                    </select>
+                </div>
+                <div class="header-control" id="gameSelectControl1">
+                    <label for="gameSelect1">Игра 1:</label>
+                    <select id="gameSelect1" onchange="updateStats()">
+                        <option value="">Выберите игру</option>
+                    </select>
+                </div>
+                <div class="header-control" id="gameSelectControl2" style="display: none;">
+                    <label for="gameSelect2">Игра 2:</label>
+                    <select id="gameSelect2" onchange="updateStats()">
+                        <option value="">Выберите игру</option>
+                    </select>
+                </div>
+                <div class="header-control" id="gameSelectControl3" style="display: none;">
+                    <label for="gameSelect3">Игра 3:</label>
+                    <select id="gameSelect3" onchange="updateStats()">
+                        <option value="">Выберите игру</option>
+                    </select>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="user-info">
+                    <img id="userAvatar" class="user-avatar" src="" alt="Avatar">
+                    <span id="userName" class="user-name"></span>
+                </div>
+                <button class="signout-btn" onclick="signOut()">Выйти</button>
+            </div>
+        </div>
+
+    <div class="sidebar" id="sidebar">
+        <h3>Управление играми</h3>
+        <button class="sidebar-btn" onclick="openAddGameModal()">➕ Добавить игру</button>
+        <button class="sidebar-btn danger" onclick="clearAllData()">Очистить все данные</button>
+        
+        <h3>Данные</h3>
+        <button class="sidebar-btn success" onclick="exportData()">📤 Экспорт данных</button>
+        <label for="importFile" class="file-input-label">📥 Импорт данных</label>
+        <input type="file" id="importFile" class="file-input" accept=".json" onchange="importData(event)">
+    </div>
+
+    <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+    <div class="main-content">
+        <div id="statsContainer" class="stats-container one-game">
+            <div class="no-games">
+                <p>Добавьте игру через ⚙️ для начала отслеживания статистики</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальные окна -->
+    <div id="addGameModal" class="modal">
+        <div class="modal-content">
+            <h3>Добавить новую игру</h3>
+            <div class="form-group">
+                <label for="gameName">Название игры:</label>
+                <input type="text" id="gameName" placeholder="Введите название игры">
+            </div>
+            
+            <div class="banner-setup">
+                <h4>Настройка баннеров</h4>
+                
+                <div class="banner-config">
+                    <div class="banner-config-header">
+                        <input type="checkbox" id="standardBanner" checked>
+                        <label for="standardBanner">Стандартный баннер</label>
+                    </div>
+                    <div class="guarantee-input">
+                        <label for="standardGuarantee">Гарант:</label>
+                        <select id="standardGuarantee">
+                            <option value="90">90</option>
+                            <option value="80">80</option>
+                            <option value="70">70</option>
+                            <option value="custom">Другой</option>
+                        </select>
+                        <input type="number" id="standardCustom" style="display: none; margin-top: 5px;" min="1" max="200" placeholder="Введите значение">
+                    </div>
+                </div>
+
+                <div class="banner-config">
+                    <div class="banner-config-header">
+                        <input type="checkbox" id="eventBanner" checked>
+                        <label for="eventBanner">Ивентовый баннер</label>
+                    </div>
+                    <div class="guarantee-input">
+                        <label for="eventGuarantee">Гарант:</label>
+                        <select id="eventGuarantee">
+                            <option value="90">90</option>
+                            <option value="80">80</option>
+                            <option value="70">70</option>
+                            <option value="custom">Другой</option>
+                        </select>
+                        <input type="number" id="eventCustom" style="display: none; margin-top: 5px;" min="1" max="200" placeholder="Введите значение">
+                    </div>
+                </div>
+
+                <div class="banner-config">
+                    <div class="banner-config-header">
+                        <input type="checkbox" id="weaponBanner" checked>
+                        <label for="weaponBanner">Оружейный баннер</label>
+                    </div>
+                    <div class="guarantee-input">
+                        <label for="weaponGuarantee">Гарант:</label>
+                        <select id="weaponGuarantee">
+                            <option value="80">80</option>
+                            <option value="90">90</option>
+                            <option value="70">70</option>
+                            <option value="custom">Другой</option>
+                        </select>
+                        <input type="number" id="weaponCustom" style="display: none; margin-top: 5px;" min="1" max="200" placeholder="Введите значение">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-buttons">
+                <button class="btn btn-secondary" onclick="closeAddGameModal()">Отмена</button>
+                <button class="btn btn-primary" onclick="addGame()">Добавить</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="addPullModal" class="modal">
+        <div class="modal-content">
+            <h3 id="addPullTitle">Добавить крутку</h3>
+            <div class="form-group">
+                <label for="pullName">Название персонажа/оружия:</label>
+                <input type="text" id="pullName" placeholder="Введите название">
+            </div>
+            <div class="form-group">
+                <label for="pullCount">Количество круток:</label>
+                <input type="number" id="pullCount" min="1" max="200" placeholder="Введите количество">
+            </div>
+            <div class="form-group" id="pullTypeGroup">
+                <label for="pullType">Тип:</label>
+                <select id="pullType">
+                    <option value="character">Персонаж</option>
+                    <option value="weapon">Оружие</option>
+                </select>
+            </div>
+            <div class="form-group" id="eventResultGroup" style="display: none;">
+                <label for="eventResult">Результат:</label>
+                <select id="eventResult">
+                    <option value="win">Победа (W)</option>
+                    <option value="lose">Поражение (L)</option>
+                    <option value="guarantee">Гарант (G)</option>
+                </select>
+            </div>
+            <div class="form-buttons">
+                <button class="btn btn-secondary" onclick="closeAddPullModal()">Отмена</button>
+                <button class="btn btn-primary" onclick="savePull()">Сохранить</button>
+            </div>
+        </div>
+    </div>
+
+    </div>
+
+    <script>
+        // Firebase конфигурация
+        const firebaseConfig = {
+            apiKey: "AIzaSyBrlOVpLyaQC-j35jKI6dpUROeJ4Q2dXaU",
+            authDomain: "igatrackers.firebaseapp.com",
+            projectId: "igatrackers",
+            storageBucket: "igatrackers.firebasestorage.app",
+            messagingSenderId: "629727578641",
+            appId: "1:629727578641:web:c85bd10081c56e0e283fb0",
+            measurementId: "G-MZ6W6B5MTX"
+        };
+
+        // Инициализация Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        let games = [];
+        let currentGameIds = [null, null, null];
+        let currentBannerType = null;
+        let editingPullIndex = -1;
+        let currentUser = null;
+
+        // Функции авторизации
+        function signInWithGoogle() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider).catch(error => {
+                console.error('Ошибка авторизации:', error);
+                alert('Ошибка входа. Попробуйте еще раз.');
+            });
+        }
+
+        function signOut() {
+            auth.signOut().then(() => {
+                showAuthScreen();
+            }).catch(error => {
+                console.error('Ошибка выхода:', error);
+            });
+        }
+
+        function showAuthScreen() {
+            document.getElementById('authScreen').style.display = 'flex';
+            document.getElementById('appContent').style.display = 'none';
+        }
+
+        function showAppContent() {
+            document.getElementById('authScreen').style.display = 'none';
+            document.getElementById('appContent').style.display = 'block';
+        }
+
+        function updateUserInfo(user) {
+            const userAvatar = document.getElementById('userAvatar');
+            const userName = document.getElementById('userName');
+            
+            if (user && user.photoURL) {
+                userAvatar.src = user.photoURL;
+            } else {
+                userAvatar.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiM0YTkwZTIiLz4KPHN2ZyB4PSI4IiB5PSI4IiB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0id2hpdGUiPgo8cGF0aCBkPSJNMTIgMTJjMi4yMSAwIDQtMS43OSA0LTRzLTEuNzktNC00LTQtNCAxLjc5LTQgNCAxLjc5IDQgNCA0em0wIDJjLTIuNjcgMC04IDEuMzQtOCA0djJoMTZ2LTJjMC0yLjY2LTUuMzMtNC04LTR6Ii8+Cjwvc3ZnPgo8L3N2Zz4K';
+            }
+            
+            if (user && user.displayName) {
+                userName.textContent = user.displayName;
+            } else {
+                userName.textContent = 'Пользователь';
+            }
+        }
+
+        // Слушатель состояния авторизации
+        auth.onAuthStateChanged(async function(user) {
+            currentUser = user;
+            
+            if (user) {
+                // Пользователь авторизован
+                showAppContent();
+                updateUserInfo(user);
+                
+                // Загружаем данные пользователя
+                await loadUserData();
+                const savedSettings = await loadInterfaceSettings();
+                updateGameSelectors();
+                setupGuaranteeHandlers();
+                
+                // Применяем сохраненные настройки интерфейса
+                if (savedSettings) {
+                    updateViewMode();
+                }
+            } else {
+                // Пользователь не авторизован
+                showAuthScreen();
+                games = [];
+                currentGameIds = [null, null, null];
+            }
+        });
+
+        // Загрузка данных при запуске
+        window.onload = function() {
+            // Настраиваем обработчик кнопки входа
+            document.getElementById('googleSignInBtn').addEventListener('click', signInWithGoogle);
+        };
+
+        // Настройка обработчиков для гарантов
+        function setupGuaranteeHandlers() {
+            ['standard', 'event', 'weapon'].forEach(type => {
+                const select = document.getElementById(type + 'Guarantee');
+                const customInput = document.getElementById(type + 'Custom');
+                
+                select.onchange = function() {
+                    if (this.value === 'custom') {
+                        customInput.style.display = 'block';
+                    } else {
+                        customInput.style.display = 'none';
+                    }
+                };
+            });
+        }
+
+        // Управление сайдбаром
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            
+            if (sidebar.classList.contains('open')) {
+                sidebar.classList.remove('open');
+                overlay.classList.remove('show');
+            } else {
+                sidebar.classList.add('open');
+                overlay.classList.add('show');
+            }
+        }
+
+        // Загрузка и сохранение данных пользователя
+        async function loadUserData() {
+            if (!currentUser) return;
+            
+            try {
+                const doc = await db.collection('gacha').doc(currentUser.uid).get();
+                if (doc.exists) {
+                    games = doc.data().games || [];
+                    console.log('Данные загружены из Firebase');
+                } else {
+                    games = [];
+                    console.log('Новый пользователь, создаем пустые данные');
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки данных:', error);
+                games = [];
+            }
+        }
+
+        async function saveData() {
+            if (!currentUser) return;
+            
+            try {
+                await db.collection('gacha').doc(currentUser.uid).set({
+                    games: games,
+                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                console.log('Данные сохранены в Firebase');
+            } catch (error) {
+                console.error('Ошибка сохранения данных:', error);
+            }
+        }
+
+        // Сохранение и загрузка настроек интерфейса
+        function saveInterfaceSettings() {
+            const settings = {
+                viewMode: document.getElementById('viewMode').value,
+                gameCount: document.getElementById('gameCount').value,
+                selectedGames: [
+                    document.getElementById('gameSelect1').value,
+                    document.getElementById('gameSelect2').value,
+                    document.getElementById('gameSelect3').value
+                ]
+            };
+            localStorage.setItem('gachaInterfaceSettings', JSON.stringify(settings));
+        }
+
+        function loadInterfaceSettings() {
+            const savedSettings = localStorage.getItem('gachaInterfaceSettings');
+            if (savedSettings) {
+                const settings = JSON.parse(savedSettings);
+                
+                // Применяем настройки после загрузки игр
+                document.getElementById('viewMode').value = settings.viewMode || 'stats';
+                document.getElementById('gameCount').value = settings.gameCount || '1';
+                
+                // Устанавливаем выбранные игры
+                currentGameIds = settings.selectedGames || [null, null, null];
+                
+                return settings;
+            }
+            return null;
+        }
+
+        // Управление режимом просмотра
+        function updateViewMode() {
+            const viewMode = document.getElementById('viewMode').value;
+            const gameCountControl = document.getElementById('gameCountControl');
+            const gameSelectControls = ['gameSelectControl1', 'gameSelectControl2', 'gameSelectControl3'];
+            const container = document.getElementById('statsContainer');
+            
+            if (viewMode === 'comparison') {
+                gameCountControl.style.display = 'none';
+                gameSelectControls.forEach(id => document.getElementById(id).style.display = 'none');
+                // Убираем классы статистики и устанавливаем класс для сравнения
+                container.className = 'stats-container';
+                showComparison();
+            } else {
+                gameCountControl.style.display = 'flex';
+                updateGameCount();
+                updateStats();
+            }
+            
+            saveInterfaceSettings();
+        }
+
+        function updateGameCount() {
+            const count = parseInt(document.getElementById('gameCount').value);
+            const gameSelectControls = ['gameSelectControl1', 'gameSelectControl2', 'gameSelectControl3'];
+            
+            gameSelectControls.forEach((id, index) => {
+                document.getElementById(id).style.display = index < count ? 'flex' : 'none';
+            });
+            
+            const container = document.getElementById('statsContainer');
+            container.className = `stats-container ${count === 1 ? 'one-game' : count === 2 ? 'two-games' : 'three-games'}`;
+            
+            saveInterfaceSettings();
+        }
+
+        // Функция для расчета серий побед/поражений
+        function calculateStreaks(pulls) {
+            let currentWinStreak = 0;
+            let currentLoseStreak = 0;
+            let maxWinStreak = 0;
+            let maxLoseStreak = 0;
+            
+            // Проходим по всем пулам с результатами (исключая гарант)
+            pulls.filter(p => p.eventResult && p.eventResult !== 'guarantee').forEach(pull => {
+                if (pull.eventResult === 'win') {
+                    currentWinStreak++;
+                    currentLoseStreak = 0;
+                    maxWinStreak = Math.max(maxWinStreak, currentWinStreak);
+                } else if (pull.eventResult === 'lose') {
+                    currentLoseStreak++;
+                    currentWinStreak = 0;
+                    maxLoseStreak = Math.max(maxLoseStreak, currentLoseStreak);
+                }
+            });
+            
+            return { maxWinStreak, maxLoseStreak };
+        }
+
+        // Функция для расчета коэффициента удачи
+        function calculateLuckScore(game) {
+            if (!game.banners || game.banners.length === 0) return 0;
+            
+            let totalScore = 0;
+            let totalWeight = 0;
+            
+            // Рассчитываем общую статистику
+            const totalPulls = game.banners.reduce((sum, banner) => 
+                sum + banner.pulls.reduce((bannerSum, pull) => bannerSum + pull.count, 0), 0);
+            
+            const totalLegendaries = game.banners.reduce((sum, banner) => sum + banner.pulls.length, 0);
+            
+            if (totalLegendaries === 0) return 0;
+            
+            const avgLegendary = totalPulls / totalLegendaries;
+            
+            // 1. Оценка средней легендарки (вес: 40%)
+            // Рассчитываем среднюю легендарку для каждого типа баннера с весами
+            let weightedAvgScore = 0;
+            let totalWeightedPulls = 0;
+            let totalWeightedLegendaries = 0;
+            
+            game.banners.forEach(banner => {
+                const bannerPulls = banner.pulls.reduce((sum, pull) => sum + pull.count, 0);
+                const bannerLegendaries = banner.pulls.length;
+                
+                if (bannerLegendaries > 0) {
+                    const bannerAvg = bannerPulls / bannerLegendaries;
+                    let bannerWeight = 0;
+                    
+                    // Определяем вес баннера
+                    if (banner.type === 'event') {
+                        bannerWeight = 0.5; // 50% для ивентового
+                    } else if (banner.type === 'weapon' || banner.type === 'standard') {
+                        bannerWeight = 0.25; // 25% для оружейного и стандартного
+                    }
+                    
+                    // Рассчитываем границы для конкретного баннера
+                    const excellentThreshold = Math.floor(banner.guarantee * 0.55);
+                    const goodThreshold = Math.floor(banner.guarantee * 0.68);
+                    const averageThreshold = Math.floor(banner.guarantee * 0.82);
+                    
+                    let bannerScore = 0;
+                    if (bannerAvg <= excellentThreshold) {
+                        bannerScore = 90;
+                    } else if (bannerAvg <= goodThreshold) {
+                        bannerScore = 70;
+                    } else if (bannerAvg <= averageThreshold) {
+                        bannerScore = 50;
+                    } else {
+                        bannerScore = 30;
+                    }
+                    
+                    weightedAvgScore += bannerScore * bannerWeight;
+                    totalWeightedPulls += bannerPulls * bannerWeight;
+                    totalWeightedLegendaries += bannerLegendaries * bannerWeight;
+                }
+            });
+            
+            totalScore += weightedAvgScore * 0.4;
+            totalWeight += 0.4;
+            
+            // 2. Оценка ранних круток (вес: 20%)
+            let earlyPulls = 0;
+            let totalPullsForEarly = 0;
+            
+            game.banners.forEach(banner => {
+                banner.pulls.forEach(pull => {
+                    totalPullsForEarly++;
+                    const greenMax = Math.floor(banner.guarantee * 39 / 90);
+                    if (pull.count <= greenMax) {
+                        earlyPulls++;
+                    }
+                });
+            });
+            
+            const earlyRate = totalPullsForEarly > 0 ? (earlyPulls / totalPullsForEarly) * 100 : 0;
+            let earlyScore = 0;
+            if (earlyRate >= 30) {
+                earlyScore = 80; // Много ранних круток
+            } else if (earlyRate >= 20) {
+                earlyScore = 60;
+            } else if (earlyRate >= 10) {
+                earlyScore = 40;
+            } else if (earlyRate >= 5) {
+                earlyScore = 20;
+            } else {
+                earlyScore = 10;
+            }
+            totalScore += earlyScore * 0.2;
+            totalWeight += 0.2;
+            
+            // 3. Оценка 50/50 (вес: 30%)
+            let fiftyFiftyWins = 0;
+            let fiftyFiftyCount = 0;
+            
+            game.banners.forEach(banner => {
+                if (banner.type === 'event' || banner.type === 'weapon') {
+                    const relevantPulls = banner.pulls.filter(p => p.eventResult && p.eventResult !== 'guarantee');
+                    fiftyFiftyCount += relevantPulls.length;
+                    
+                    relevantPulls.forEach(pull => {
+                        if (pull.eventResult === 'win') {
+                            fiftyFiftyWins++;
+                        }
+                    });
+                }
+            });
+            
+            const fiftyFiftyRate = fiftyFiftyCount > 0 ? (fiftyFiftyWins / fiftyFiftyCount) * 100 : 0;
+            let fiftyFiftyScore = 0;
+            
+            if (fiftyFiftyRate <= 33.3) {
+                fiftyFiftyScore = 20; // Плохо
+            } else if (fiftyFiftyRate <= 66.6) {
+                fiftyFiftyScore = 40; // Нормально
+            } else {
+                fiftyFiftyScore = 60; // Хорошо
+            }
+            
+            totalScore += fiftyFiftyScore * 0.3;
+            totalWeight += 0.3;
+            
+            // 4. Оценка серий (вес: 10%)
+            let streakScore = 0;
+            let totalStreaks = 0;
+            
+            game.banners.forEach(banner => {
+                if (banner.type === 'event') {
+                    const streaks = calculateStreaks(banner.pulls);
+                    if (streaks.maxWinStreak > 0) {
+                        streakScore += Math.min(streaks.maxWinStreak * 10, 100); // +10 за каждую победу в серии
+                        totalStreaks++;
+                    }
+                    if (streaks.maxLoseStreak > 0) {
+                        streakScore -= Math.min(streaks.maxLoseStreak * 10, 50); // -10 за каждое поражение в серии
+                        totalStreaks++;
+                    }
+                }
+            });
+            
+            const finalStreakScore = totalStreaks > 0 ? Math.max(0, Math.min(100, streakScore / totalStreaks + 50)) : 50;
+            totalScore += finalStreakScore * 0.1;
+            totalWeight += 0.1;
+            
+            const finalScore = totalWeight > 0 ? Math.round(totalScore / totalWeight) : 0;
+            
+            return finalScore;
+        }
+
+        // Функция для получения класса коэффициента удачи
+        function getLuckClass(score) {
+            if (score >= 75) return 'excellent';
+            if (score >= 60) return 'good';
+            if (score >= 45) return 'average';
+            return 'bad';
+        }
+
+        // Функция для получения текста коэффициента удачи
+        function getLuckText(score) {
+            if (score >= 75) return 'Отличная удача';
+            if (score >= 60) return 'Хорошая удача';
+            if (score >= 45) return 'Средняя удача';
+            return 'Плохая удача';
+        }
+
+        // Управление играми
+        function updateGameSelectors() {
+            ['gameSelect1', 'gameSelect2', 'gameSelect3'].forEach(selectId => {
+                const select = document.getElementById(selectId);
+                select.innerHTML = '<option value="">Выберите игру</option>';
+                
+                games.forEach(game => {
+                    const option = document.createElement('option');
+                    option.value = game.id;
+                    option.textContent = game.name;
+                    select.appendChild(option);
+                });
+            });
+
+            // Устанавливаем сохраненные значения или значения по умолчанию
+            if (games.length > 0) {
+                for (let i = 0; i < 3; i++) {
+                    if (!currentGameIds[i] || !games.find(g => g.id === currentGameIds[i])) {
+                        currentGameIds[i] = i < games.length ? games[i].id : null;
+                    }
+                    document.getElementById(`gameSelect${i + 1}`).value = currentGameIds[i] || '';
+                }
+            }
+
+            updateStats();
+        }
+
+        function updateStats() {
+            const viewMode = document.getElementById('viewMode').value;
+            if (viewMode === 'comparison') {
+                showComparison();
+                return;
+            }
+
+            const count = parseInt(document.getElementById('gameCount').value);
+            updateGameCount();
+            
+            // Получаем выбранные игры и сохраняем их
+            const selectedGames = [];
+            for (let i = 0; i < count; i++) {
+                const gameId = document.getElementById(`gameSelect${i + 1}`).value;
+                if (gameId) {
+                    const game = games.find(g => g.id === gameId);
+                    if (game) selectedGames.push(game);
+                }
+                currentGameIds[i] = gameId || null;
+            }
+
+            saveInterfaceSettings();
+
+            const container = document.getElementById('statsContainer');
+            
+            if (selectedGames.length === 0) {
+                container.innerHTML = '<div class="no-games"><p>Выберите игры для отображения статистики</p></div>';
+                return;
+            }
+
+            container.innerHTML = selectedGames.map(game => renderGameStats(game)).join('');
+        }
+
+        function renderGameStats(game) {
+            // Рассчитываем общую статистику
+            const totalPulls = game.banners.reduce((sum, banner) => 
+                sum + banner.pulls.reduce((bannerSum, pull) => bannerSum + pull.count, 0), 0);
+            
+            const totalLegendaries = game.banners.reduce((sum, banner) => sum + banner.pulls.length, 0);
+            
+            const avgLegendary = totalLegendaries > 0 ? (totalPulls / totalLegendaries).toFixed(1) : 0;
+
+            // Рассчитываем статистику 50/50 для ивентового баннера
+            const eventBanner = game.banners.find(b => b.type === 'event');
+            let eventWinRate = 0;
+            let eventStreaks = { maxWinStreak: 0, maxLoseStreak: 0 };
+            if (eventBanner) {
+                const eventPulls = eventBanner.pulls.filter(p => p.eventResult && p.eventResult !== 'guarantee');
+                const wins = eventPulls.filter(p => p.eventResult === 'win').length;
+                eventWinRate = eventPulls.length > 0 ? (wins * 100 / eventPulls.length).toFixed(1) : 0;
+                eventStreaks = calculateStreaks(eventBanner.pulls);
+            }
+
+            // Рассчитываем статистику для оружейного баннера
+            const weaponBanner = game.banners.find(b => b.type === 'weapon');
+            let weaponWinRate = 0;
+            if (weaponBanner) {
+                const weaponPulls = weaponBanner.pulls.filter(p => p.eventResult && p.eventResult !== 'guarantee');
+                const wins = weaponPulls.filter(p => p.eventResult === 'win').length;
+                weaponWinRate = weaponPulls.length > 0 ? (wins * 100 / weaponPulls.length).toFixed(1) : 0;
+            }
+
+            // Рассчитываем коэффициент удачи
+            const luckScore = calculateLuckScore(game);
+            const luckClass = getLuckClass(luckScore);
+            const luckText = getLuckText(luckScore);
+
+            // Рассчитываем детали для отображения
+            let earlyPulls = 0;
+            let totalPullsForEarly = 0;
+            game.banners.forEach(banner => {
+                banner.pulls.forEach(pull => {
+                    totalPullsForEarly++;
+                    const greenMax = Math.floor(banner.guarantee * 39 / 90);
+                    if (pull.count <= greenMax) {
+                        earlyPulls++;
+                    }
+                });
+            });
+            const earlyRate = totalPullsForEarly > 0 ? (earlyPulls / totalPullsForEarly * 100).toFixed(1) : 0;
+
+            return `
+                <div class="game-stats">
+                    <div class="game-title">
+                        <div class="game-title-left">
+                            ${game.name}
+                        </div>
+                        <div class="game-title-right">
+                            ${totalLegendaries > 0 ? `
+                                <div class="luck-score ${luckClass}">
+                                    <div class="luck-score-circle">${luckScore}</div>
+                                    <div class="luck-score-text">${luckText}</div>
+                                </div>
+                            ` : ''}
+                            <div class="game-actions">
+                                <button class="game-action-btn" onclick="editGame('${game.id}')" title="Редактировать игру">✏️</button>
+                                <button class="game-action-btn delete" onclick="deleteGame('${game.id}')" title="Удалить игру">🗑️</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="overall-stats">
+                        <div class="stat-card">
+                            <div class="stat-value">${totalPulls}</div>
+                            <div class="stat-label">Всего круток</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${totalLegendaries}</div>
+                            <div class="stat-label">Легендарок</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${avgLegendary}</div>
+                            <div class="stat-label">Средняя лега</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${eventWinRate}%</div>
+                            <div class="stat-label">Побед событий</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${weaponWinRate}%</div>
+                            <div class="stat-label">Побед оружия</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${eventStreaks.maxWinStreak}</div>
+                            <div class="stat-label">Серия побед</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${eventStreaks.maxLoseStreak}</div>
+                            <div class="stat-label">Серия поражений</div>
+                        </div>
+                    </div>
+                    <div class="banners-container">
+                        ${game.banners.map(banner => renderBanner(banner, game.id)).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderBanner(banner, gameId) {
+            const totalPulls = banner.pulls.reduce((sum, pull) => sum + pull.count, 0);
+            const totalLegendaries = banner.pulls.length;
+            const avgLegendary = totalLegendaries > 0 ? (totalPulls / totalLegendaries).toFixed(1) : 0;
+
+            // Реверсируем порядок круток (новые сверху)
+            const reversedPulls = [...banner.pulls].reverse();
+
+            return `
+                <div class="banner">
+                    <div class="banner-title">${banner.name}</div>
+                    <div class="banner-stats">
+                        <div class="banner-stat">
+                            <div>${totalPulls}</div>
+                            <div>Круток</div>
+                        </div>
+                        <div class="banner-stat">
+                            <div>${totalLegendaries}</div>
+                            <div>Лег</div>
+                        </div>
+                        <div class="banner-stat">
+                            <div>${avgLegendary}</div>
+                            <div>Средняя</div>
+                        </div>
+                    </div>
+                    <button class="add-pull-btn" onclick="openAddPullModal('${banner.type}', '${gameId}')">+ Добавить крутку</button>
+                    <div class="pulls-list">
+                        ${reversedPulls.map((pull, index) => renderPull(pull, banner.guarantee, banner.pulls.length - index, gameId, banner.type, banner.pulls.length - 1 - index)).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderPull(pull, guarantee, number, gameId, bannerType, originalIndex) {
+            const countClass = getCountClass(pull.count, guarantee);
+            const typeClass = pull.type === 'weapon' ? 'weapon' : 'character';
+            
+            let eventResultHtml = '';
+            if (pull.eventResult) {
+                const resultClass = pull.eventResult === 'win' ? 'win' : 
+                                  pull.eventResult === 'lose' ? 'lose' : 'guarantee';
+                const resultText = pull.eventResult === 'win' ? 'W' : 
+                                 pull.eventResult === 'lose' ? 'L' : 'G';
+                eventResultHtml = `<span class="pull-type ${resultClass}">${resultText}</span>`;
+            }
+
+            return `
+                <div class="pull-item">
+                    <span class="pull-number">#${number}</span>
+                    <div class="pull-name ${typeClass}">
+                        ${eventResultHtml}
+                        <span>${pull.name}</span>
+                    </div>
+                    <span class="pull-count ${countClass}">${pull.count}</span>
+                    <div class="pull-actions">
+                        <button class="pull-action-btn" onclick="editPull('${gameId}', '${bannerType}', ${originalIndex})">✏️</button>
+                        <button class="pull-action-btn delete" onclick="deletePull('${gameId}', '${bannerType}', ${originalIndex})">🗑️</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getCountClass(count, guarantee) {
+            let greenMax, yellowMax;
+            
+            if (guarantee === 90) {
+                greenMax = 39;
+                yellowMax = 73;
+            } else if (guarantee === 80) {
+                greenMax = 29;
+                yellowMax = 63;
+            } else if (guarantee === 70) {
+                greenMax = 19;
+                yellowMax = 53;
+            } else {
+                // Для пользовательских гарантов: используем пропорции от гаранта 90
+                greenMax = Math.floor(guarantee * 39 / 90);
+                yellowMax = Math.floor(guarantee * 73 / 90);
+            }
+            
+            if (count <= greenMax) return 'good';
+            if (count <= yellowMax) return 'average';
+            return 'bad';
+        }
+
+        // Модальные окна игр
+        function openAddGameModal() {
+            document.getElementById('addGameModal').style.display = 'block';
+            toggleSidebar();
+        }
+
+        function closeAddGameModal() {
+            document.getElementById('addGameModal').style.display = 'none';
+            resetGameForm();
+        }
+
+        function resetGameForm() {
+            document.getElementById('gameName').value = '';
+            ['standard', 'event', 'weapon'].forEach(type => {
+                document.getElementById(type + 'Banner').checked = true;
+                document.getElementById(type + 'Guarantee').value = type === 'weapon' ? '80' : '90';
+                document.getElementById(type + 'Custom').style.display = 'none';
+                document.getElementById(type + 'Custom').value = '';
+            });
+        }
+
+        function addGame() {
+            const name = document.getElementById('gameName').value.trim();
+            if (!name) {
+                alert('Введите название игры');
+                return;
+            }
+
+            const banners = [];
+            let hasError = false;
+            
+            ['standard', 'event', 'weapon'].forEach(type => {
+                if (document.getElementById(type + 'Banner').checked) {
+                    const guaranteeSelect = document.getElementById(type + 'Guarantee');
+                    let guarantee = parseInt(guaranteeSelect.value);
+                    
+                    if (guaranteeSelect.value === 'custom') {
+                        guarantee = parseInt(document.getElementById(type + 'Custom').value);
+                        if (!guarantee || guarantee < 1) {
+                            alert(`Введите корректное значение гаранта для ${type === 'standard' ? 'стандартного' : type === 'event' ? 'ивентового' : 'оружейного'} баннера`);
+                            hasError = true;
+                            return;
+                        }
+                    }
+
+                    const bannerNames = {
+                        standard: 'Стандартный',
+                        event: 'Ивентовый',
+                        weapon: 'Оружейный'
+                    };
+
+                    banners.push({
+                        type: type,
+                        name: bannerNames[type],
+                        guarantee: guarantee,
+                        pulls: []
+                    });
+                }
+            });
+
+            if (hasError) return;
+
+            if (banners.length === 0) {
+                alert('Выберите хотя бы один баннер');
+                return;
+            }
+
+            const newGame = {
+                id: Date.now().toString(),
+                name: name,
+                banners: banners
+            };
+
+            games.push(newGame);
+            currentGameIds[0] = newGame.id;
+            saveData();
+            updateGameSelectors();
+            closeAddGameModal();
+        }
+
+        function editGame(gameId) {
+            const game = games.find(g => g.id === gameId);
+            if (!game) return;
+
+            // Заполняем форму текущими данными
+            document.getElementById('gameName').value = game.name;
+            
+            // Сбрасываем чекбоксы
+            ['standard', 'event', 'weapon'].forEach(type => {
+                document.getElementById(type + 'Banner').checked = false;
+                document.getElementById(type + 'Guarantee').value = type === 'weapon' ? '80' : '90';
+                document.getElementById(type + 'Custom').style.display = 'none';
+            });
+
+            // Устанавливаем данные баннеров
+            game.banners.forEach(banner => {
+                document.getElementById(banner.type + 'Banner').checked = true;
+                const guaranteeSelect = document.getElementById(banner.type + 'Guarantee');
+                if ([70, 80, 90].includes(banner.guarantee)) {
+                    guaranteeSelect.value = banner.guarantee.toString();
+                } else {
+                    guaranteeSelect.value = 'custom';
+                    document.getElementById(banner.type + 'Custom').style.display = 'block';
+                    document.getElementById(banner.type + 'Custom').value = banner.guarantee;
+                }
+            });
+
+            openAddGameModal();
+            
+            // Меняем кнопку добавления на сохранение
+            const addBtn = document.querySelector('#addGameModal .btn-primary');
+            addBtn.textContent = 'Сохранить';
+            addBtn.onclick = function() { updateGame(gameId); };
+        }
+
+        function deleteGame(gameId) {
+            const game = games.find(g => g.id === gameId);
+            if (!game) return;
+
+            if (confirm(`Удалить игру "${game.name}"? Все данные будут потеряны.`)) {
+                games = games.filter(g => g.id !== gameId);
+                
+                // Обновляем текущие выбранные игры
+                currentGameIds = currentGameIds.map(id => id === gameId ? null : id);
+                
+                saveData();
+                updateGameSelectors();
+            }
+        }
+
+        function updateGame(gameId) {
+            const name = document.getElementById('gameName').value.trim();
+            if (!name) {
+                alert('Введите название игры');
+                return;
+            }
+
+            const game = games.find(g => g.id === gameId);
+            if (!game) return;
+
+            const newBanners = [];
+            let hasError = false;
+            
+            ['standard', 'event', 'weapon'].forEach(type => {
+                if (document.getElementById(type + 'Banner').checked) {
+                    const guaranteeSelect = document.getElementById(type + 'Guarantee');
+                    let guarantee = parseInt(guaranteeSelect.value);
+                    
+                    if (guaranteeSelect.value === 'custom') {
+                        guarantee = parseInt(document.getElementById(type + 'Custom').value);
+                        if (!guarantee || guarantee < 1) {
+                            alert(`Введите корректное значение гаранта для ${type === 'standard' ? 'стандартного' : type === 'event' ? 'ивентового' : 'оружейного'} баннера`);
+                            hasError = true;
+                            return;
+                        }
+                    }
+
+                    const existing = game.banners.find(b => b.type === type);
+                    const bannerNames = {
+                        standard: 'Стандартный',
+                        event: 'Ивентовый',
+                        weapon: 'Оружейный'
+                    };
+
+                    newBanners.push({
+                        type: type,
+                        name: bannerNames[type],
+                        guarantee: guarantee,
+                        pulls: existing ? existing.pulls : []
+                    });
+                }
+            });
+
+            if (hasError) return;
+
+            game.name = name;
+            game.banners = newBanners;
+
+            saveData();
+            updateGameSelectors();
+            closeAddGameModal();
+            
+            // Возвращаем кнопку в исходное состояние
+            const addBtn = document.querySelector('#addGameModal .btn-primary');
+            addBtn.textContent = 'Добавить';
+            addBtn.onclick = function() { addGame(); };
+        }
+
+        function clearAllData() {
+            if (confirm('Очистить все данные игр? Настройки игр останутся, но вся статистика будет удалена.')) {
+                games.forEach(game => {
+                    game.banners.forEach(banner => {
+                        banner.pulls = [];
+                    });
+                });
+                saveData();
+                updateStats();
+                toggleSidebar();
+            }
+        }
+
+        // Добавление и редактирование круток
+        function openAddPullModal(bannerType, gameId) {
+            currentBannerType = bannerType;
+            currentGameIds[0] = gameId;
+            editingPullIndex = -1;
+            
+            const modal = document.getElementById('addPullModal');
+            const title = document.getElementById('addPullTitle');
+            const typeGroup = document.getElementById('pullTypeGroup');
+            const eventGroup = document.getElementById('eventResultGroup');
+            
+            const game = games.find(g => g.id === gameId);
+            const banner = game.banners.find(b => b.type === bannerType);
+            
+            title.textContent = `Добавить крутку - ${banner.name}`;
+            
+            // Показываем/скрываем поля в зависимости от типа баннера
+            if (bannerType === 'standard') {
+                typeGroup.style.display = 'block';
+                eventGroup.style.display = 'none';
+            } else {
+                typeGroup.style.display = 'none';
+                eventGroup.style.display = 'block'; // Теперь показываем для всех не-стандартных баннеров
+            }
+            
+            // Сброс формы
+            document.getElementById('pullName').value = '';
+            document.getElementById('pullCount').value = '';
+            document.getElementById('pullType').value = 'character';
+            document.getElementById('eventResult').value = 'win';
+            
+            modal.style.display = 'block';
+        }
+
+        function editPull(gameId, bannerType, pullIndex) {
+            const game = games.find(g => g.id === gameId);
+            const banner = game.banners.find(b => b.type === bannerType);
+            const pull = banner.pulls[pullIndex];
+            
+            currentBannerType = bannerType;
+            currentGameIds[0] = gameId;
+            editingPullIndex = pullIndex;
+            
+            const modal = document.getElementById('addPullModal');
+            const title = document.getElementById('addPullTitle');
+            const typeGroup = document.getElementById('pullTypeGroup');
+            const eventGroup = document.getElementById('eventResultGroup');
+            
+            title.textContent = `Редактировать крутку - ${banner.name}`;
+            
+            // Заполняем форму данными крутки
+            document.getElementById('pullName').value = pull.name;
+            document.getElementById('pullCount').value = pull.count;
+            document.getElementById('pullType').value = pull.type || 'character';
+            document.getElementById('eventResult').value = pull.eventResult || 'win';
+            
+            // Показываем/скрываем поля
+            if (bannerType === 'standard') {
+                typeGroup.style.display = 'block';
+                eventGroup.style.display = 'none';
+            } else {
+                typeGroup.style.display = 'none';
+                eventGroup.style.display = 'block';
+            }
+            
+            modal.style.display = 'block';
+        }
+
+        function deletePull(gameId, bannerType, pullIndex) {
+            const game = games.find(g => g.id === gameId);
+            const banner = game.banners.find(b => b.type === bannerType);
+            const pull = banner.pulls[pullIndex];
+            
+            if (confirm(`Удалить крутку "${pull.name}" (${pull.count} круток)?`)) {
+                banner.pulls.splice(pullIndex, 1);
+                saveData();
+                updateStats();
+            }
+        }
+
+        function closeAddPullModal() {
+            document.getElementById('addPullModal').style.display = 'none';
+        }
+
+        function savePull() {
+            const name = document.getElementById('pullName').value.trim();
+            const count = parseInt(document.getElementById('pullCount').value);
+            
+            if (!name) {
+                alert('Введите название персонажа/оружия');
+                return;
+            }
+            
+            if (!count || count < 1) {
+                alert('Введите корректное количество круток');
+                return;
+            }
+
+            const game = games.find(g => g.id === currentGameIds[0]);
+            const banner = game.banners.find(b => b.type === currentBannerType);
+            
+            const pull = {
+                name: name,
+                count: count
+            };
+
+            // Добавляем тип для стандартного баннера
+            if (currentBannerType === 'standard') {
+                pull.type = document.getElementById('pullType').value;
+            } else {
+                pull.type = currentBannerType === 'weapon' ? 'weapon' : 'character';
+            }
+
+            // Добавляем результат для ивентового и оружейного баннеров
+            if (currentBannerType === 'event' || currentBannerType === 'weapon') {
+                pull.eventResult = document.getElementById('eventResult').value;
+            }
+
+            if (editingPullIndex >= 0) {
+                // Редактирование существующей крутки
+                banner.pulls[editingPullIndex] = pull;
+            } else {
+                // Добавление новой крутки
+                banner.pulls.push(pull);
+            }
+
+            saveData();
+            updateStats();
+            closeAddPullModal();
+        }
+
+        // Импорт и экспорт данных
+        function exportData() {
+            const dataStr = JSON.stringify(games, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = `gacha_stats_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            
+            toggleSidebar();
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    
+                    if (confirm('Импортировать данные? Текущие данные будут заменены.')) {
+                        games = importedData;
+                        currentGameIds = [null, null, null];
+                        saveData();
+                        updateGameSelectors();
+                    }
+                } catch (error) {
+                    alert('Ошибка при чтении файла. Проверьте формат файла.');
+                }
+            };
+            reader.readAsText(file);
+            
+            // Сброс input файла
+            event.target.value = '';
+            toggleSidebar();
+        }
+
+        // Сравнение игр
+        function showComparison() {
+            const container = document.getElementById('statsContainer');
+            
+            if (games.length === 0) {
+                container.innerHTML = '<div class="no-games"><p>Нет игр для сравнения</p></div>';
+                return;
+            }
+
+            const gameStats = games.map(game => {
+                const totalPulls = game.banners.reduce((sum, banner) => 
+                    sum + banner.pulls.reduce((bannerSum, pull) => bannerSum + pull.count, 0), 0);
+                
+                const totalLegendaries = game.banners.reduce((sum, banner) => sum + banner.pulls.length, 0);
+                
+                const avgLegendary = totalLegendaries > 0 ? totalPulls / totalLegendaries : 0;
+
+                // Статистика ивентового баннера
+                const eventBanner = game.banners.find(b => b.type === 'event');
+                let eventWinRate = 0;
+                let eventStreaks = { maxWinStreak: 0, maxLoseStreak: 0 };
+                if (eventBanner) {
+                    const eventPulls = eventBanner.pulls.filter(p => p.eventResult && p.eventResult !== 'guarantee');
+                    const wins = eventPulls.filter(p => p.eventResult === 'win').length;
+                    eventWinRate = eventPulls.length > 0 ? wins / eventPulls.length * 100 : 0;
+                    eventStreaks = calculateStreaks(eventBanner.pulls);
+                }
+
+                // Статистика оружейного баннера
+				const weaponBanner = game.banners.find(b => b.type === 'weapon');
+				let weaponWinRate = 0;
+				if (weaponBanner) {
+					const weaponPulls = weaponBanner.pulls.filter(p => p.eventResult && p.eventResult !== 'guarantee');
+					const wins = weaponPulls.filter(p => p.eventResult === 'win').length;
+					weaponWinRate = weaponPulls.length > 0 ? wins / weaponPulls.length * 100 : 0;
+				}
+
+				// Рассчитываем процент ранних легендарок
+				let earlyPulls = 0;
+				let totalPullsForEarly = 0;
+				game.banners.forEach(banner => {
+					banner.pulls.forEach(pull => {
+						totalPullsForEarly++;
+						const greenMax = Math.floor(banner.guarantee * 39 / 90);
+						if (pull.count <= greenMax) {
+							earlyPulls++;
+						}
+					});
+				});
+				const earlyRate = totalPullsForEarly > 0 ? (earlyPulls / totalPullsForEarly * 100).toFixed(1) : 0;
+
+				// Находим самый ранний и самый поздний пул
+				let earliestPull = null;
+				let latestPull = null;
+				game.banners.forEach(banner => {
+					banner.pulls.forEach(pull => {
+						if (!earliestPull || pull.count < earliestPull.count) {
+							earliestPull = pull;
+						}
+						if (!latestPull || pull.count > latestPull.count) {
+							latestPull = pull;
+						}
+					});
+				});
+
+				return {
+					name: game.name,
+					totalPulls,
+					totalLegendaries,
+					avgLegendary,
+					eventWinRate,
+					weaponWinRate,
+					maxWinStreak: eventStreaks.maxWinStreak,
+					maxLoseStreak: eventStreaks.maxLoseStreak,
+					luckScore: calculateLuckScore(game),
+					earlyRate: parseFloat(earlyRate),
+					earliestPull: earliestPull ? earliestPull.count : 0,
+					latestPull: latestPull ? latestPull.count : 0
+				};
+            });
+
+            // Находим лучшие и худшие показатели (исключая нулевые значения где это имеет смысл)
+            const validLegendaries = gameStats.filter(g => g.totalLegendaries > 0);
+            const validAvg = gameStats.filter(g => g.avgLegendary > 0);
+            const validEventWinRate = gameStats.filter(g => g.eventWinRate > 0);
+            const validWeaponWinRate = gameStats.filter(g => g.weaponWinRate > 0);
+            const validWinStreak = gameStats.filter(g => g.maxWinStreak > 0);
+            const validLoseStreak = gameStats.filter(g => g.maxLoseStreak > 0);
+
+            const bestLegendaries = validLegendaries.length > 0 ? Math.max(...validLegendaries.map(g => g.totalLegendaries)) : 0;
+            const worstLegendaries = validLegendaries.length > 0 ? Math.min(...validLegendaries.map(g => g.totalLegendaries)) : 0;
+            const bestAvg = validAvg.length > 0 ? Math.min(...validAvg.map(g => g.avgLegendary)) : 0;
+            const worstAvg = validAvg.length > 0 ? Math.max(...validAvg.map(g => g.avgLegendary)) : 0;
+            const bestEventWinRate = validEventWinRate.length > 0 ? Math.max(...validEventWinRate.map(g => g.eventWinRate)) : 0;
+            const worstEventWinRate = validEventWinRate.length > 0 ? Math.min(...validEventWinRate.map(g => g.eventWinRate)) : 0;
+            const bestWeaponWinRate = validWeaponWinRate.length > 0 ? Math.max(...validWeaponWinRate.map(g => g.weaponWinRate)) : 0;
+            const worstWeaponWinRate = validWeaponWinRate.length > 0 ? Math.min(...validWeaponWinRate.map(g => g.weaponWinRate)) : 0;
+            const bestWinStreak = validWinStreak.length > 0 ? Math.max(...validWinStreak.map(g => g.maxWinStreak)) : 0;
+            const worstWinStreak = validWinStreak.length > 0 ? Math.min(...validWinStreak.map(g => g.maxWinStreak)) : 0;
+            const bestLoseStreak = validLoseStreak.length > 0 ? Math.min(...validLoseStreak.map(g => g.maxLoseStreak)) : 0; // Минимум лучше для поражений
+            const worstLoseStreak = validLoseStreak.length > 0 ? Math.max(...validLoseStreak.map(g => g.maxLoseStreak)) : 0;
+            
+            // Коэффициент удачи
+            const validLuckScores = gameStats.filter(g => g.luckScore > 0);
+            const bestLuckScore = validLuckScores.length > 0 ? Math.max(...validLuckScores.map(g => g.luckScore)) : 0;
+            const worstLuckScore = validLuckScores.length > 0 ? Math.min(...validLuckScores.map(g => g.luckScore)) : 0;
+            
+            // Процент ранних легендарок
+            const validEarlyRates = gameStats.filter(g => g.earlyRate > 0);
+            const bestEarlyRate = validEarlyRates.length > 0 ? Math.max(...validEarlyRates.map(g => g.earlyRate)) : 0;
+            const worstEarlyRate = validEarlyRates.length > 0 ? Math.min(...validEarlyRates.map(g => g.earlyRate)) : 0;
+            
+            // Самый ранний и самый поздний пул
+            const validEarliestPulls = gameStats.filter(g => g.earliestPull > 0);
+            const bestEarliestPull = validEarliestPulls.length > 0 ? Math.min(...validEarliestPulls.map(g => g.earliestPull)) : 0; // Минимум лучше для ранних
+            const worstEarliestPull = validEarliestPulls.length > 0 ? Math.max(...validEarliestPulls.map(g => g.earliestPull)) : 0;
+            
+            const validLatestPulls = gameStats.filter(g => g.latestPull > 0);
+            const bestLatestPull = validLatestPulls.length > 0 ? Math.min(...validLatestPulls.map(g => g.latestPull)) : 0; // Минимум лучше для поздних
+            const worstLatestPull = validLatestPulls.length > 0 ? Math.max(...validLatestPulls.map(g => g.latestPull)) : 0;
+
+            // Определяем количество игр для CSS классов
+            const gameCount = gameStats.length;
+            const gridClass = gameCount === 1 ? 'one-game' : gameCount === 2 ? 'two-games' : 'three-games';
+
+            // Функция для получения класса удачи
+            function getLuckClass(score) {
+                return score >= 75 ? 'excellent' : score >= 60 ? 'good' : score >= 45 ? 'average' : 'bad';
+            }
+
+            // Функция для получения текста удачи
+            function getLuckText(score) {
+                return score >= 75 ? 'Отличная удача' : score >= 60 ? 'Хорошая удача' : score >= 45 ? 'Средняя удача' : 'Плохая удача';
+            }
+
+            const comparisonHtml = `
+                <div class="comparison-view">
+                    <div class="comparison-title">Сравнение игр</div>
+                    <div class="comparison-games ${gridClass}">
+                        ${gameStats.map(stat => `
+                            <div class="comparison-game">
+                                <div class="comparison-game-title">
+                                    ${stat.name}
+                                </div>
+                                
+                                ${stat.luckScore > 0 ? `
+                                    <div class="comparison-luck-score ${getLuckClass(stat.luckScore)}">
+                                        <div class="comparison-luck-circle">${stat.luckScore}</div>
+                                        <div class="comparison-luck-text">${getLuckText(stat.luckScore)}</div>
+                                    </div>
+                                ` : ''}
+                                
+                                <div class="comparison-overall-stats">
+                                    <div class="comparison-stat-card ${stat.totalLegendaries === bestLegendaries && bestLegendaries > 0 ? 'best' : stat.totalLegendaries === worstLegendaries && worstLegendaries > 0 ? 'worst' : ''}">
+                                        <div class="comparison-stat-value">${stat.totalLegendaries}</div>
+                                        <div class="comparison-stat-label">Легендарок</div>
+                                    </div>
+                                    
+                                    <div class="comparison-stat-card ${stat.avgLegendary === bestAvg && bestAvg > 0 ? 'best' : stat.avgLegendary === worstAvg && worstAvg > 0 ? 'worst' : ''}">
+                                        <div class="comparison-stat-value">${stat.avgLegendary > 0 ? stat.avgLegendary.toFixed(1) : '-'}</div>
+                                        <div class="comparison-stat-label">Средняя лега</div>
+                                    </div>
+                                    
+                                    <div class="comparison-stat-card ${stat.eventWinRate === bestEventWinRate && bestEventWinRate > 0 ? 'best' : stat.eventWinRate === worstEventWinRate && worstEventWinRate > 0 ? 'worst' : ''}">
+                                        <div class="comparison-stat-value">${stat.eventWinRate > 0 ? stat.eventWinRate.toFixed(1) + '%' : '-'}</div>
+                                        <div class="comparison-stat-label">Побед событий</div>
+                                    </div>
+                                    
+                                    <div class="comparison-stat-card ${stat.weaponWinRate === bestWeaponWinRate && bestWeaponWinRate > 0 ? 'best' : stat.weaponWinRate === worstWeaponWinRate && worstWeaponWinRate > 0 ? 'worst' : ''}">
+                                        <div class="comparison-stat-value">${stat.weaponWinRate > 0 ? stat.weaponWinRate.toFixed(1) + '%' : '-'}</div>
+                                        <div class="comparison-stat-label">Побед оружия</div>
+                                    </div>
+                                    
+                                    <div class="comparison-stat-card ${stat.earlyRate === bestEarlyRate && bestEarlyRate > 0 ? 'best' : stat.earlyRate === worstEarlyRate && worstEarlyRate > 0 ? 'worst' : ''}">
+                                        <div class="comparison-stat-value">${stat.earlyRate > 0 ? stat.earlyRate + '%' : '-'}</div>
+                                        <div class="comparison-stat-label">Ранние леги</div>
+                                    </div>
+                                    
+                                    <div class="comparison-stat-card ${stat.maxWinStreak === bestWinStreak && bestWinStreak > 0 ? 'best' : stat.maxWinStreak === worstWinStreak && worstWinStreak > 0 ? 'worst' : ''}">
+                                        <div class="comparison-stat-value">${stat.maxWinStreak > 0 ? stat.maxWinStreak : '-'}</div>
+                                        <div class="comparison-stat-label">Серия побед</div>
+                                    </div>
+                                    
+                                    <div class="comparison-stat-card ${stat.maxLoseStreak === bestLoseStreak && bestLoseStreak > 0 ? 'best' : stat.maxLoseStreak === worstLoseStreak && worstLoseStreak > 0 ? 'worst' : ''}">
+                                        <div class="comparison-stat-value">${stat.maxLoseStreak > 0 ? stat.maxLoseStreak : '-'}</div>
+                                        <div class="comparison-stat-label">Серия поражений</div>
+                                    </div>
+                                    
+                                    <div class="comparison-stat-card ${stat.earliestPull === bestEarliestPull && bestEarliestPull > 0 ? 'best' : stat.earliestPull === worstEarliestPull && worstEarliestPull > 0 ? 'worst' : ''}">
+                                        <div class="comparison-stat-value">${stat.earliestPull > 0 ? stat.earliestPull : '-'}</div>
+                                        <div class="comparison-stat-label">Самый ранний</div>
+                                    </div>
+                                    
+                                    <div class="comparison-stat-card ${stat.latestPull === bestLatestPull && bestLatestPull > 0 ? 'best' : stat.latestPull === worstLatestPull && worstLatestPull > 0 ? 'worst' : ''}">
+                                        <div class="comparison-stat-value">${stat.latestPull > 0 ? stat.latestPull : '-'}</div>
+                                        <div class="comparison-stat-label">Самый поздний</div>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    
+                    <div class="comparison-summary">
+                        <div class="comparison-summary-title">📊 Общая статистика</div>
+                        <div class="comparison-summary-stats">
+                            <div class="comparison-summary-stat">
+                                <div class="comparison-summary-value">${gameStats.length}</div>
+                                <div class="comparison-summary-label">Игр в сравнении</div>
+                            </div>
+                            <div class="comparison-summary-stat">
+                                <div class="comparison-summary-value">${gameStats.reduce((sum, g) => sum + g.totalLegendaries, 0)}</div>
+                                <div class="comparison-summary-label">Всего легендарок</div>
+                            </div>
+                            <div class="comparison-summary-stat">
+                                <div class="comparison-summary-value">${gameStats.reduce((sum, g) => sum + g.totalPulls, 0)}</div>
+                                <div class="comparison-summary-label">Всего круток</div>
+                            </div>
+                            <div class="comparison-summary-stat">
+                                <div class="comparison-summary-value">${(gameStats.reduce((sum, g) => sum + g.luckScore, 0) / gameStats.filter(g => g.luckScore > 0).length).toFixed(1)}</div>
+                                <div class="comparison-summary-label">Средний коэф. удачи</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            container.innerHTML = comparisonHtml;
+        }
+
+        // Горячие клавиши
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const modals = document.querySelectorAll('.modal');
+                modals.forEach(modal => {
+                    if (modal.style.display === 'block') {
+                        modal.style.display = 'none';
+                    }
+                });
+                
+                const sidebar = document.getElementById('sidebar');
+                if (sidebar.classList.contains('open')) {
+                    toggleSidebar();
+                }
+            }
+        });
+
+        // Автосохранение при изменениях
+        setInterval(saveData, 30000); // Автосохранение каждые 30 секунд
+		
+		// Регистрация Service Worker для PWA
+		async function registerServiceWorker() {
+			if ('serviceWorker' in navigator) {
+				try {
+					const registration = await navigator.serviceWorker.register('./sw.js');
+					console.log('Service Worker зарегистрирован:', registration);
+				} catch (error) {
+					console.error('Ошибка регистрации Service Worker:', error);
+				}
+			}
+		}
+    </script>
+</body>
+</html>
