@@ -1906,9 +1906,20 @@
             
             console.log('Ищем игру:', gameName);
             
-            const usersWithGame = allUsersData.filter(user => 
-                user.games.some(game => game.name === gameName)
-            );
+            // Для GFL2 ищем оба варианта названия
+            let usersWithGame;
+            if (gameType === 'gfl2') {
+                usersWithGame = allUsersData.filter(user => 
+                    user.games.some(game => 
+                        game.name === 'Girls\' Frontline 2: Exilium' || 
+                        game.name === 'Girls\' Frontline 2'
+                    )
+                );
+            } else {
+                usersWithGame = allUsersData.filter(user => 
+                    user.games.some(game => game.name === gameName)
+                );
+            }
             
             console.log('Пользователей с игрой', gameName, ':', usersWithGame.length);
             console.log('Все игры у пользователей:');
@@ -1927,20 +1938,32 @@
             
             // Рассчитываем статистику для каждого пользователя
             const userStats = usersWithGame.map(user => {
-                const game = user.games.find(g => g.name === gameName);
+                let game;
+                if (gameType === 'gfl2') {
+                    game = user.games.find(g => 
+                        g.name === 'Girls\' Frontline 2: Exilium' || 
+                        g.name === 'Girls\' Frontline 2'
+                    );
+                } else {
+                    game = user.games.find(g => g.name === gameName);
+                }
+                
                 if (!game) return null;
                 
                 console.log('Обрабатываем игру для пользователя', user.displayName, ':', game);
                 
                 const totalPulls = game.banners.reduce((sum, b) => sum + b.pulls.length, 0);
+                
+                // Считаем легендарными только те крутки, которые действительно легендарные
+                // (имеют результат 'win', 'lose' или 'guarantee')
                 const legendaryPulls = game.banners.reduce((sum, b) => 
-                    sum + b.pulls.filter(p => p.type === 'character' || p.type === 'weapon').length, 0
+                    sum + b.pulls.filter(p => p.result === 'win' || p.result === 'lose' || p.result === 'guarantee').length, 0
                 );
                 
                 console.log('Детали расчета для', user.displayName, ':');
                 game.banners.forEach(banner => {
                     console.log('Баннер', banner.type, ':', banner.pulls.length, 'круток');
-                    const legendaryInBanner = banner.pulls.filter(p => p.type === 'character' || p.type === 'weapon').length;
+                    const legendaryInBanner = banner.pulls.filter(p => p.result === 'win' || p.result === 'lose' || p.result === 'guarantee').length;
                     console.log('Легендарных в баннере:', legendaryInBanner);
                 });
                 const avgLegendary = legendaryPulls > 0 ? (totalPulls / legendaryPulls).toFixed(1) : 0;
