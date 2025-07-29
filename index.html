@@ -1556,8 +1556,11 @@
 
         // Функция переключения глобальной статистики
         function toggleGlobalStats() {
+            console.log('toggleGlobalStats вызвана, текущий режим:', isGlobalStatsMode);
+            
             if (isGlobalStatsMode) {
                 // Возвращаемся к своей статистике
+                console.log('Возвращаемся к своей статистике');
                 isGlobalStatsMode = false;
                 selectedUser = null;
                 document.getElementById('globalStatsBtn').textContent = 'Глобальная статистика';
@@ -1565,6 +1568,7 @@
                 showMyStats();
             } else {
                 // Переходим к глобальной статистике
+                console.log('Переходим к глобальной статистике');
                 isGlobalStatsMode = true;
                 document.getElementById('globalStatsBtn').textContent = 'Моя статистика';
                 document.getElementById('globalStatsBtn').classList.add('my-stats');
@@ -1575,12 +1579,18 @@
         // Загрузка глобальной статистики
         async function loadGlobalStats() {
             try {
+                console.log('Загружаем глобальную статистику...');
+                
                 // Получаем всех пользователей с данными
                 const usersSnapshot = await db.collection('gacha').get();
                 allUsersData = [];
                 
+                console.log('Найдено документов:', usersSnapshot.docs.length);
+                
                 for (const doc of usersSnapshot.docs) {
                     const userData = doc.data();
+                    console.log('Данные пользователя:', doc.id, userData);
+                    
                     if (userData.games && userData.games.length > 0) {
                         // Используем данные из gacha коллекции
                         allUsersData.push({
@@ -1593,30 +1603,50 @@
                     }
                 }
                 
+                console.log('Загружено пользователей:', allUsersData.length);
                 showGlobalStats();
             } catch (error) {
                 console.error('Ошибка загрузки глобальной статистики:', error);
+                alert('Ошибка загрузки глобальной статистики: ' + error.message);
             }
         }
 
         // Показать глобальную статистику
         function showGlobalStats() {
+            console.log('Показываем глобальную статистику...');
             const container = document.getElementById('container');
+            
+            if (!container) {
+                console.error('Контейнер не найден!');
+                return;
+            }
+            
             container.innerHTML = '';
             
             if (selectedUser) {
+                console.log('Показываем статистику пользователя:', selectedUser.displayName);
                 showUserStats(selectedUser);
             } else {
+                console.log('Показываем список пользователей');
                 showGlobalUsersList();
             }
         }
 
         // Показать список пользователей
         function showGlobalUsersList() {
+            console.log('Показываем список пользователей...');
             const container = document.getElementById('container');
             
+            if (!container) {
+                console.error('Контейнер не найден!');
+                return;
+            }
+            
             // Скрываем элементы управления
-            document.querySelector('.header-controls').style.display = 'none';
+            const headerControls = document.querySelector('.header-controls');
+            if (headerControls) {
+                headerControls.style.display = 'none';
+            }
             
             // Создаем вкладки
             const tabsHtml = `
@@ -1630,11 +1660,13 @@
             
             container.innerHTML = tabsHtml + '<div id="globalContent"></div>';
             
+            console.log('HTML добавлен в контейнер');
             switchGlobalTab('users');
         }
 
         // Переключение вкладок глобальной статистики
         function switchGlobalTab(tab) {
+            console.log('Переключаем на вкладку:', tab);
             currentGlobalView = tab;
             
             // Обновляем активную вкладку
@@ -1652,11 +1684,18 @@
 
         // Показать список пользователей
         function showUsersList() {
+            console.log('Показываем список пользователей, всего:', allUsersData.length);
             const content = document.getElementById('globalContent');
+            
+            if (!content) {
+                console.error('Элемент globalContent не найден!');
+                return;
+            }
             
             let html = '<div class="users-list">';
             
             const usersToShow = allUsersData.slice(0, 20);
+            console.log('Показываем пользователей:', usersToShow.length);
             
             usersToShow.forEach(user => {
                 html += `
@@ -1684,6 +1723,7 @@
             }
             
             content.innerHTML = html;
+            console.log('HTML добавлен в globalContent');
         }
 
         // Показать всех пользователей
