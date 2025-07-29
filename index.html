@@ -1051,6 +1051,7 @@
             margin-bottom: 20px;
             justify-content: center;
             flex-wrap: wrap;
+            padding: 20px;
         }
 
         .global-tab {
@@ -1071,6 +1072,7 @@
         .global-tab.active {
             background: #4a90e2;
             color: white;
+            box-shadow: 0 2px 8px rgba(74, 144, 226, 0.4);
         }
 
         .users-list {
@@ -1116,8 +1118,7 @@
 
         .selected-user-info {
             display: flex;
-            align-items: center;
-            gap: 15px;
+            justify-content: center;
             background: rgba(20, 20, 40, 0.9);
             border: 1px solid #4a90e2;
             border-radius: 12px;
@@ -1125,14 +1126,89 @@
             margin-bottom: 20px;
         }
 
+        .selected-user-center {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
         .selected-user-info .user-avatar {
-            width: 40px;
-            height: 40px;
+            width: 48px;
+            height: 48px;
         }
 
         .selected-user-info h2 {
             margin: 0;
             color: #e0e0e0;
+            font-size: 24px;
+        }
+
+        .game-stats-comparison {
+            padding: 20px;
+        }
+
+        .stat-section {
+            background: rgba(20, 20, 40, 0.8);
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .stat-section:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(74, 144, 226, 0.3);
+        }
+
+        .stat-title {
+            color: #4a90e2;
+            font-size: 18px;
+            margin: 0 0 15px 0;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .stat-users {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .stat-user-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .stat-user-row:hover {
+            background: rgba(74, 144, 226, 0.1);
+        }
+
+        .stat-user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stat-user-info .user-avatar {
+            width: 32px;
+            height: 32px;
+        }
+
+        .stat-user-info .user-name {
+            color: #e0e0e0;
+            font-weight: bold;
+        }
+
+        .stat-value {
+            color: #4a90e2;
+            font-weight: bold;
+            font-size: 16px;
         }
 
         .game-comparison {
@@ -1801,11 +1877,13 @@
             // Восстанавливаем свои данные
             games = originalGames;
             
-            // Добавляем информацию о пользователе сверху
+            // Добавляем информацию о пользователе по центру сверху
             const userInfoHtml = `
                 <div class="selected-user-info">
-                    <img src="${user.photoURL || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiM0YTkwZTIiLz4KPHN2ZyB4PSI4IiB5PSI4IiB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0id2hpdGUiPgo8cGF0aCBkPSJNMTIgMTJjMi4yMSAwIDQtMS43OSA0LTRzLTEuNzktNC00LTQtNCAxLjc5LTQgNCAxLjc5IDQgNCA0em0wIDJjLTIuNjcgMC04IDEuMzQtOCA0djJoMTZ2LTJjMC0yLjY2LTUuMzMtNC04LTR6Ii8+Cjwvc3ZnPgo8L3N2Zz4K'}" alt="Avatar" class="user-avatar">
-                    <h2>${user.displayName}</h2>
+                    <div class="selected-user-center">
+                        <img src="${user.photoURL || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiM0YTkwZTIiLz4KPHN2ZyB4PSI4IiB5PSI4IiB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0id2hpdGUiPgo8cGF0aCBkPSJNMTIgMTJjMi4yMSAwIDQtMS43OSA0LTRzLTEuNzktNC00LTQtNCAxLjc5LTQgNCAxLjc5IDQgNCA0em0wIDJjLTIuNjcgMC04IDEuMzQtOCA0djJoMTZ2LTJjMC0yLjY2LTUuMzMtNC04LTR6Ii8+Cjwvc3ZnPgo8L3N2Zz4K'}" alt="Avatar" class="user-avatar">
+                        <h2>${user.displayName}</h2>
+                    </div>
                 </div>
             `;
             
@@ -1823,29 +1901,27 @@
                 'genshin': 'Genshin Impact'
             }[gameType];
             
+            console.log('Ищем игру:', gameName);
+            
             const usersWithGame = allUsersData.filter(user => 
                 user.games.some(game => game.name === gameName)
             );
+            
+            console.log('Пользователей с игрой', gameName, ':', usersWithGame.length);
+            usersWithGame.forEach(user => {
+                const game = user.games.find(g => g.name === gameName);
+                console.log('Пользователь', user.displayName, 'игра:', game?.name);
+            });
             
             if (usersWithGame.length === 0) {
                 content.innerHTML = '<p class="no-data">Нет данных по этой игре</p>';
                 return;
             }
             
-            // Сортируем по общему количеству круток
-            usersWithGame.sort((a, b) => {
-                const gameA = a.games.find(g => g.name === gameName);
-                const gameB = b.games.find(g => g.name === gameName);
-                const totalA = gameA ? gameA.banners.reduce((sum, b) => sum + b.pulls.length, 0) : 0;
-                const totalB = gameB ? gameB.banners.reduce((sum, b) => sum + b.pulls.length, 0) : 0;
-                return totalB - totalA; // От большего к меньшему
-            });
-            
-            let html = '<div class="game-comparison">';
-            
-            usersWithGame.forEach((user, index) => {
+            // Рассчитываем статистику для каждого пользователя
+            const userStats = usersWithGame.map(user => {
                 const game = user.games.find(g => g.name === gameName);
-                if (!game) return;
+                if (!game) return null;
                 
                 const totalPulls = game.banners.reduce((sum, b) => sum + b.pulls.length, 0);
                 const legendaryPulls = game.banners.reduce((sum, b) => 
@@ -1853,34 +1929,77 @@
                 );
                 const avgLegendary = legendaryPulls > 0 ? (totalPulls / legendaryPulls).toFixed(1) : 0;
                 
+                // Рассчитываем дополнительные статистики
+                const earlyPulls = game.banners.reduce((sum, b) => 
+                    sum + b.pulls.filter(p => p.count <= 10).length, 0
+                );
+                const earlyRate = totalPulls > 0 ? ((earlyPulls / totalPulls) * 100).toFixed(1) : 0;
+                
+                // Рассчитываем коэффициент удачи
+                const luckScore = calculateLuckScore(game);
+                
+                return {
+                    user,
+                    totalPulls,
+                    legendaryPulls,
+                    avgLegendary,
+                    earlyPulls,
+                    earlyRate,
+                    luckScore
+                };
+            }).filter(Boolean);
+            
+            // Создаем HTML для каждой характеристики
+            let html = '<div class="game-stats-comparison">';
+            
+            // 1. Всего круток
+            const totalPullsSorted = [...userStats].sort((a, b) => b.totalPulls - a.totalPulls);
+            html += createStatisticSection('Всего круток', totalPullsSorted, 'totalPulls');
+            
+            // 2. Легендарок
+            const legendaryPullsSorted = [...userStats].sort((a, b) => b.legendaryPulls - a.legendaryPulls);
+            html += createStatisticSection('Легендарок', legendaryPullsSorted, 'legendaryPulls');
+            
+            // 3. Средняя лега
+            const avgLegendarySorted = [...userStats].sort((a, b) => parseFloat(a.avgLegendary) - parseFloat(b.avgLegendary));
+            html += createStatisticSection('Средняя лега', avgLegendarySorted, 'avgLegendary');
+            
+            // 4. Ранние крутки
+            const earlyRateSorted = [...userStats].sort((a, b) => parseFloat(b.earlyRate) - parseFloat(a.earlyRate));
+            html += createStatisticSection('Ранние крутки (%)', earlyRateSorted, 'earlyRate');
+            
+            // 5. Коэффициент удачи
+            const luckScoreSorted = [...userStats].sort((a, b) => b.luckScore - a.luckScore);
+            html += createStatisticSection('Коэффициент удачи', luckScoreSorted, 'luckScore');
+            
+            html += '</div>';
+            content.innerHTML = html;
+        }
+
+        // Создать секцию статистики
+        function createStatisticSection(title, sortedStats, field) {
+            let html = `<div class="stat-section">
+                <h3 class="stat-title">${title}</h3>
+                <div class="stat-users">`;
+            
+            sortedStats.forEach((stat, index) => {
                 const trophy = index < 3 ? ['🏆', '🥈', '🥉'][index] : '';
+                const value = field === 'avgLegendary' || field === 'earlyRate' ? 
+                    stat[field] : Math.round(stat[field]);
                 
                 html += `
-                    <div class="comparison-card">
-                        <div class="comparison-header">
-                            ${trophy} <img src="${user.photoURL || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiM0YTkwZTIiLz4KPHN2ZyB4PSI4IiB5PSI4IiB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0id2hpdGUiPgo8cGF0aCBkPSJNMTIgMTJjMi4yMSAwIDQtMS43OSA0LTRzLTEuNzktNC00LTQtNCAxLjc5LTQgNCAxLjc5IDQgNCA0em0wIDJjLTIuNjcgMC04IDEuMzQtOCA0djJoMTZ2LTJjMC0yLjY2LTUuMzMtNC04LTR6Ii8+Cjwvc3ZnPgo8L3N2Zz4K'}" alt="Avatar" class="user-avatar">
-                            <h3>${user.displayName}</h3>
+                    <div class="stat-user-row">
+                        <div class="stat-user-info">
+                            ${trophy} <img src="${stat.user.photoURL || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiM0YTkwZTIiLz4KPHN2ZyB4PSI4IiB5PSI4IiB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0id2hpdGUiPgo8cGF0aCBkPSJNMTIgMTJjMi4yMSAwIDQtMS43OSA0LTRzLTEuNzktNC00LTQtNCAxLjc5LTQgNCAxLjc5IDQgNCA0em0wIDJjLTIuNjcgMC04IDEuMzQtOCA0djJoMTZ2LTJjMC0yLjY2LTUuMzMtNC04LTR6Ii8+Cjwvc3ZnPgo8L3N2Zz4K'}" alt="Avatar" class="user-avatar">
+                            <span class="user-name">${stat.user.displayName}</span>
                         </div>
-                        <div class="comparison-stats">
-                            <div class="stat-item">
-                                <span class="stat-label">Всего круток:</span>
-                                <span class="stat-value">${totalPulls}</span>
-                            </div>
-                            <div class="stat-item">
-                                <span class="stat-label">Легендарок:</span>
-                                <span class="stat-value">${legendaryPulls}</span>
-                            </div>
-                            <div class="stat-item">
-                                <span class="stat-label">Средняя лега:</span>
-                                <span class="stat-value">${avgLegendary}</span>
-                            </div>
-                        </div>
+                        <div class="stat-value">${value}</div>
                     </div>
                 `;
             });
             
-            html += '</div>';
-            content.innerHTML = html;
+            html += '</div></div>';
+            return html;
         }
 
         // Показать свою статистику
