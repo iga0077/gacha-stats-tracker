@@ -1891,7 +1891,7 @@
             // Восстанавливаем свои данные
             games = originalGames;
             
-            // Добавляем информацию о пользователе по центру сверху
+            // Добавляем информацию о пользователе перед statsContainer
             const userInfoHtml = `
                 <div class="selected-user-info">
                     <div class="selected-user-center">
@@ -1901,7 +1901,8 @@
                 </div>
             `;
             
-            container.insertAdjacentHTML('afterbegin', userInfoHtml);
+            // Вставляем перед statsContainer
+            container.insertAdjacentHTML('beforebegin', userInfoHtml);
         }
 
         // Показать сравнение по игре
