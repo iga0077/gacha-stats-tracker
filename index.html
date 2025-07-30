@@ -609,11 +609,11 @@
             margin-top: 50px;
         }
 
-        .comparison-view {
+.comparison-view {
             max-width: 1400px;
-            margin: 0 auto;
+    margin: 0 auto;
             width: 100%;
-        }
+}
 
         .comparison-title {
             font-size: 28px;
@@ -623,7 +623,7 @@
             font-weight: bold;
         }
 
-        .comparison-games {
+.comparison-games {
             display: grid;
             gap: 30px;
         }
@@ -638,15 +638,15 @@
 
         .comparison-games.three-games {
             grid-template-columns: repeat(3, 1fr);
-        }
+}
 
-        .comparison-game {
+.comparison-game {
             background: rgba(20, 20, 40, 0.8);
             border-radius: 15px;
             padding: 25px;
             border: 1px solid #333;
-            position: relative;
-        }
+    position: relative;
+}
 
         .comparison-game-title {
             font-size: 24px;
@@ -1347,45 +1347,45 @@
 
     <!-- Основное приложение -->
     <div id="appContent" class="app-content" style="display: none;">
-        <div class="header">
-            <div class="header-left">
-                <button class="settings-btn" onclick="toggleSidebar()">⚙️</button>
+    <div class="header">
+        <div class="header-left">
+            <button class="settings-btn" onclick="toggleSidebar()">⚙️</button>
+        </div>
+        <div class="header-controls">
+            <div class="header-control">
+                <label for="viewMode">Режим:</label>
+                <select id="viewMode" onchange="updateViewMode()">
+                    <option value="stats">Статистика</option>
+                    <option value="comparison">Сравнение</option>
+                </select>
             </div>
-            <div class="header-controls">
-                <div class="header-control">
-                    <label for="viewMode">Режим:</label>
-                    <select id="viewMode" onchange="updateViewMode()">
-                        <option value="stats">Статистика</option>
-                        <option value="comparison">Сравнение</option>
-                    </select>
-                </div>
-                <div class="header-control" id="gameCountControl">
-                    <label for="gameCount">Игр:</label>
-                    <select id="gameCount" onchange="updateStats()">
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                    </select>
-                </div>
-                <div class="header-control" id="gameSelectControl1">
-                    <label for="gameSelect1">Игра 1:</label>
-                    <select id="gameSelect1" onchange="updateStats()">
-                        <option value="">Выберите игру</option>
-                    </select>
-                </div>
-                <div class="header-control" id="gameSelectControl2" style="display: none;">
-                    <label for="gameSelect2">Игра 2:</label>
-                    <select id="gameSelect2" onchange="updateStats()">
-                        <option value="">Выберите игру</option>
-                    </select>
-                </div>
-                <div class="header-control" id="gameSelectControl3" style="display: none;">
-                    <label for="gameSelect3">Игра 3:</label>
-                    <select id="gameSelect3" onchange="updateStats()">
-                        <option value="">Выберите игру</option>
-                    </select>
-                </div>
+            <div class="header-control" id="gameCountControl">
+                <label for="gameCount">Игр:</label>
+                <select id="gameCount" onchange="updateStats()">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                </select>
             </div>
+            <div class="header-control" id="gameSelectControl1">
+                <label for="gameSelect1">Игра 1:</label>
+                <select id="gameSelect1" onchange="updateStats()">
+                    <option value="">Выберите игру</option>
+                </select>
+            </div>
+            <div class="header-control" id="gameSelectControl2" style="display: none;">
+                <label for="gameSelect2">Игра 2:</label>
+                <select id="gameSelect2" onchange="updateStats()">
+                    <option value="">Выберите игру</option>
+                </select>
+            </div>
+            <div class="header-control" id="gameSelectControl3" style="display: none;">
+                <label for="gameSelect3">Игра 3:</label>
+                <select id="gameSelect3" onchange="updateStats()">
+                    <option value="">Выберите игру</option>
+                </select>
+            </div>
+        </div>
             <div class="header-right">
                 <button id="globalStatsBtn" class="global-stats-btn" onclick="toggleGlobalStats()">Глобальная статистика</button>
                 <div class="user-info">
@@ -1393,8 +1393,8 @@
                     <span id="userName" class="user-name"></span>
                 </div>
                 <button class="signout-btn" onclick="signOut()">Выйти</button>
-            </div>
         </div>
+    </div>
 
     <div class="sidebar" id="sidebar">
         <h3>Управление играми</h3>
@@ -1606,14 +1606,14 @@
                 
                 // Загружаем данные пользователя
                 await loadUserData();
-                const savedSettings = await loadInterfaceSettings();
-                updateGameSelectors();
-                setupGuaranteeHandlers();
-                
-                // Применяем сохраненные настройки интерфейса
-                if (savedSettings) {
-                    updateViewMode();
-                }
+			const savedSettings = await loadInterfaceSettings();
+			updateGameSelectors();
+			setupGuaranteeHandlers();
+			
+			// Применяем сохраненные настройки интерфейса
+			if (savedSettings) {
+				updateViewMode();
+			}
             } else {
                 // Пользователь не авторизован
                 showAuthScreen();
@@ -1948,11 +1948,19 @@
                 );
                 const avgLegendary = legendaryPulls > 0 ? (totalPulls / legendaryPulls).toFixed(1) : 0;
                 
-                // Ранние крутки (до 10-го)
-                const earlyPulls = game.banners.reduce((sum, b) => 
-                    sum + b.pulls.filter(p => p.count <= 10).length, 0
-                );
-                const earlyRate = totalPulls > 0 ? ((earlyPulls / totalPulls) * 100).toFixed(1) : 0;
+                // Ранние крутки (по формуле как в updateStats)
+                let earlyPulls = 0;
+                let totalPullsForEarly = 0;
+                game.banners.forEach(banner => {
+                    banner.pulls.forEach(pull => {
+                        totalPullsForEarly++;
+                        const greenMax = Math.floor(banner.guarantee * 39 / 90);
+                        if (pull.count <= greenMax) {
+                            earlyPulls++;
+                        }
+                    });
+                });
+                const earlyRate = totalPullsForEarly > 0 ? ((earlyPulls / totalPullsForEarly) * 100).toFixed(1) : '0.0';
                 
                 // Самый ранний и поздний пул
                 const allPulls = game.banners.flatMap(b => b.pulls);
@@ -1966,17 +1974,17 @@
                 if (eventBanner) {
                     const eventPulls = eventBanner.pulls.filter(p => p.eventResult && p.eventResult !== 'guarantee');
                     const wins = eventPulls.filter(p => p.eventResult === 'win').length;
-                    eventWinRate = eventPulls.length > 0 ? wins / eventPulls.length * 100 : 0;
+                    eventWinRate = eventPulls.length > 0 ? (wins / eventPulls.length * 100).toFixed(1) : '0.0';
                     eventStreaks = calculateStreaks(eventBanner.pulls);
                 }
-
+                
                 // Статистика оружейного баннера
                 const weaponBanner = game.banners.find(b => b.type === 'weapon');
                 let weaponWinRate = 0;
                 if (weaponBanner) {
                     const weaponPulls = weaponBanner.pulls.filter(p => p.eventResult && p.eventResult !== 'guarantee');
                     const wins = weaponPulls.filter(p => p.eventResult === 'win').length;
-                    weaponWinRate = weaponPulls.length > 0 ? wins / weaponPulls.length * 100 : 0;
+                    weaponWinRate = weaponPulls.length > 0 ? (wins / weaponPulls.length * 100).toFixed(1) : '0.0';
                 }
                 
                 // Коэффициент удачи
@@ -2116,7 +2124,7 @@
         window.onload = function() {
             // Настраиваем обработчик кнопки входа
             document.getElementById('googleSignInBtn').addEventListener('click', signInWithGoogle);
-        };
+		};
 
         // Настройка обработчиков для гарантов
         function setupGuaranteeHandlers() {
@@ -2161,13 +2169,13 @@
                     games = [];
                     console.log('Новый пользователь, создаем пустые данные');
                 }
-            } catch (error) {
-                console.error('Ошибка загрузки данных:', error);
-                games = [];
-            }
-        }
+			} catch (error) {
+				console.error('Ошибка загрузки данных:', error);
+				games = [];
+			}
+		}
 
-        async function saveData() {
+		async function saveData() {
             if (!currentUser) return;
             
             try {
@@ -2179,10 +2187,10 @@
                     lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
                 });
                 console.log('Данные сохранены в Firebase');
-            } catch (error) {
-                console.error('Ошибка сохранения данных:', error);
-            }
-        }
+			} catch (error) {
+				console.error('Ошибка сохранения данных:', error);
+			}
+		}
 
         // Сохранение и загрузка настроек интерфейса
         function saveInterfaceSettings() {
@@ -2553,7 +2561,7 @@
                 <div class="game-stats">
                     <div class="game-title">
                         <div class="game-title-left">
-                            ${game.name}
+                        ${game.name}
                         </div>
                         <div class="game-title-right">
                             ${totalLegendaries > 0 ? `
@@ -2562,11 +2570,11 @@
                                     <div class="luck-score-text">${luckText}</div>
                                 </div>
                             ` : ''}
-                            <div class="game-actions">
-                                <button class="game-action-btn" onclick="editGame('${game.id}')" title="Редактировать игру">✏️</button>
-                                <button class="game-action-btn delete" onclick="deleteGame('${game.id}')" title="Удалить игру">🗑️</button>
-                            </div>
+                        <div class="game-actions">
+                            <button class="game-action-btn" onclick="editGame('${game.id}')" title="Редактировать игру">✏️</button>
+                            <button class="game-action-btn delete" onclick="deleteGame('${game.id}')" title="Удалить игру">🗑️</button>
                         </div>
+                    </div>
                     </div>
                     
                     <div class="overall-stats">
