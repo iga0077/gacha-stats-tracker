@@ -2083,6 +2083,10 @@
                     value = stat[field];
                 } else if (field === 'luckScore') {
                     value = Math.round(stat[field]);
+                } else if (field === 'eventStreaks.maxWinStreak') {
+                    value = stat.eventStreaks.maxWinStreak || 0;
+                } else if (field === 'eventStreaks.maxLoseStreak') {
+                    value = stat.eventStreaks.maxLoseStreak || 0;
                 } else {
                     value = Math.round(stat[field]);
                 }
