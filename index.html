@@ -1088,7 +1088,7 @@
         .global-tabs {
             display: flex;
             gap: 10px;
-            margin-bottom: 20px;
+            
             justify-content: center;
             flex-wrap: wrap;
             padding: 20px;
@@ -2104,11 +2104,11 @@
             
             // 5. Самый ранний пул
             const earliestPullSorted = [...userStats].sort((a, b) => a.earliestPull - b.earliestPull);
-            html += createStatisticSection('Самый ранний пул', earliestPullSorted, 'earliestPull');
+            html += createStatisticSection('Самая ранняя лега', earliestPullSorted, 'earliestPull');
             
             // 6. Самый поздний пул
             const latestPullSorted = [...userStats].sort((a, b) => b.latestPull - a.latestPull);
-            html += createStatisticSection('Самый поздний пул', latestPullSorted, 'latestPull');
+            html += createStatisticSection('Самая поздняя лега', latestPullSorted, 'latestPull');
             
             // 7. Победы в ивентах
             const eventWinRateSorted = [...userStats].sort((a, b) => b.eventWinRate - a.eventWinRate);
@@ -3329,12 +3329,12 @@
                                     
                                     <div class="comparison-stat-card ${stat.earliestPull === bestEarliestPull && bestEarliestPull > 0 ? 'best' : stat.earliestPull === worstEarliestPull && worstEarliestPull > 0 ? 'worst' : ''}">
                                         <div class="comparison-stat-value">${stat.earliestPull > 0 ? stat.earliestPull : '-'}</div>
-                                        <div class="comparison-stat-label">Самый ранний</div>
+                                        <div class="comparison-stat-label">Самая ранняя лега</div>
                                     </div>
                                     
                                     <div class="comparison-stat-card ${stat.latestPull === bestLatestPull && bestLatestPull > 0 ? 'best' : stat.latestPull === worstLatestPull && worstLatestPull > 0 ? 'worst' : ''}">
                                         <div class="comparison-stat-value">${stat.latestPull > 0 ? stat.latestPull : '-'}</div>
-                                        <div class="comparison-stat-label">Самый поздний</div>
+                                        <div class="comparison-stat-label">Самая поздняя лега</div>
                                     </div>
                                 </div>
                             </div>
