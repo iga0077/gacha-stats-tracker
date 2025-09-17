@@ -1927,9 +1927,9 @@
             showUserStats(selectedUser);
         }
 
-        // Возвращает актуальный список игр для отображения (мои или выбранного пользователя в глобальной статистике)
+        // Возвращает актуальный список игр для отображения (мои или выбранного пользователя)
         function getActiveGames() {
-            if (isGlobalStatsMode && selectedUser && Array.isArray(selectedUser.games)) {
+            if (selectedUser && Array.isArray(selectedUser.games)) {
                 return selectedUser.games;
             }
             return games;
