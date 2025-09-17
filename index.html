@@ -1615,6 +1615,33 @@
         let editingPullIndex = -1;
         let currentUser = null;
 
+        // Текущий выбор игры для выбранного пользователя (глобальная статистика)
+        let selectedUserGameId = null;
+
+        function populateSelectedUserGameSelect() {
+            const bar = document.getElementById('selectedUserControls');
+            if (!bar || !selectedUser || !Array.isArray(selectedUser.games)) return;
+            const options = selectedUser.games.map((g, i) => {
+                const value = g.id || `idx_${i}`;
+                const name = g.name || `Игра ${i + 1}`;
+                const selected = (value === selectedUserGameId) ? 'selected' : '';
+                return `<option value="${value}" ${selected}>${name}</option>`;
+            }).join('');
+            bar.innerHTML = `
+                <div class="user-local-controls">
+                    <label for="userGameSelect">Игра:</label>
+                    <select id="userGameSelect" onchange="onSelectedUserGameChange(this.value)">
+                        ${options}
+                    </select>
+                </div>
+            `;
+        }
+
+        function onSelectedUserGameChange(val) {
+            selectedUserGameId = val || null;
+            updateStats();
+        }
+
         // Функции авторизации
         function signInWithGoogle() {
             const provider = new firebase.auth.GoogleAuthProvider();
@@ -1974,6 +2001,34 @@
                 return;
             }
 
+            const container = document.getElementById('statsContainer');
+
+            // Если просматриваем чужой профиль, используем локальный селектор
+            if (selectedUser && Array.isArray(selectedUser.games)) {
+                const sourceGames = selectedUser.games;
+                let game = null;
+                if (selectedUserGameId) {
+                    if (selectedUserGameId.startsWith('idx_')) {
+                        const idx = parseInt(selectedUserGameId.slice(4), 10);
+                        if (!Number.isNaN(idx) && idx >= 0 && idx < sourceGames.length) {
+                            game = sourceGames[idx];
+                        }
+                    } else {
+                        game = sourceGames.find(g => g && g.id === selectedUserGameId) || null;
+                    }
+                }
+                if (!game) {
+                    game = sourceGames[0] || null;
+                }
+                if (!game) {
+                    container.innerHTML = '<div class="no-games"><p>Нет игр для отображения</p></div>';
+                    return;
+                }
+                container.innerHTML = renderGameStats(game);
+                return;
+            }
+
+            // Обычный режим (мои игры)
             const count = parseInt(document.getElementById('gameCount').value);
             updateGameCount();
             
@@ -1998,11 +2053,9 @@
             }
 
             // Не сохраняем выбор интерфейса при просмотре чужого профиля
-            if (!(isGlobalStatsMode && selectedUser)) {
+            if (!(selectedUser && Array.isArray(selectedUser.games))) {
                 saveInterfaceSettings();
             }
-
-            const container = document.getElementById('statsContainer');
             
             if (selectedGames.length === 0) {
                 container.innerHTML = '<div class="no-games"><p>Выберите игры для отображения статистики</p></div>';
@@ -2019,23 +2072,13 @@
             // Сбрасываем CSS класс контейнера для правильного отображения
             container.className = 'stats-container';
             
-            // Показываем элементы управления
-            document.querySelector('.header-controls').style.display = 'flex';
+            // Скрываем глобальные элементы управления при просмотре чужого профиля
+            document.querySelector('.header-controls').style.display = 'none';
             
-            // При входе в просмотр чужого профиля сбрасываем выбор игр на первые доступные
-            if (isGlobalStatsMode && selectedUser) {
-                const active = getActiveGames();
-                currentGameIds[0] = active[0] ? (active[0].id || 'idx_0') : null;
-                currentGameIds[1] = null;
-                currentGameIds[2] = null;
-                document.getElementById('gameCount').value = '1';
-            }
-
-            // Обновляем селекторы и статистику для выбранного пользователя (без подмены глобального games)
-            updateGameSelectors();
-            updateStats();
+            // Инициализируем выбор игры пользователя
+            selectedUserGameId = (user.games && user.games[0]) ? (user.games[0].id || 'idx_0') : null;
             
-            // Добавляем информацию о пользователе перед statsContainer
+            // Добавляем информацию о пользователе и локальные селекторы перед statsContainer
             const userInfoHtml = `
                 <div class="selected-user-info">
                     <div class="selected-user-center">
@@ -2043,13 +2086,20 @@
                         <h2>${user.displayName}</h2>
                     </div>
                 </div>
+                <div id="selectedUserControls"></div>
             `;
             
             // Удаляем предыдущую вставку, если была
             const prev = document.querySelector('.selected-user-info');
             if (prev) prev.remove();
+            const prevBar = document.getElementById('selectedUserControls');
+            if (prevBar) prevBar.remove();
             // Вставляем перед statsContainer
             container.insertAdjacentHTML('beforebegin', userInfoHtml);
+            populateSelectedUserGameSelect();
+            
+            // Обновляем статистику для выбранного пользователя
+            updateStats();
         }
 
         // Показать сравнение по игре
