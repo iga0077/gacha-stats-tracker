@@ -1845,10 +1845,10 @@
             // Создаем вкладки
             const tabsHtml = `
                 <div class="global-tabs">
-                    <button class="global-tab active" onclick="switchGlobalTab('users', this)">Все пользователи</button>
-                    <button class="global-tab" onclick="switchGlobalTab('zzz', this)">Zenless Zone Zero</button>
-                    <button class="global-tab" onclick="switchGlobalTab('gfl2', this)">Girls' Frontline 2</button>
-                    <button class="global-tab" onclick="switchGlobalTab('genshin', this)">Genshin Impact</button>
+                    <button class="global-tab active" data-tab="users" onclick="switchGlobalTab('users')">Все пользователи</button>
+                    <button class="global-tab" data-tab="zzz" onclick="switchGlobalTab('zzz')">Zenless Zone Zero</button>
+                    <button class="global-tab" data-tab="gfl2" onclick="switchGlobalTab('gfl2')">Girls' Frontline 2</button>
+                    <button class="global-tab" data-tab="genshin" onclick="switchGlobalTab('genshin')">Genshin Impact</button>
                 </div>
             `;
             
@@ -1864,21 +1864,20 @@
             const globalContent = document.getElementById('globalContent');
             console.log('globalContent создан:', !!globalContent);
             
-            switchGlobalTab('users', document.querySelector('.global-tab'));
+            switchGlobalTab('users');
         }
 
         // Переключение вкладок глобальной статистики
-        function switchGlobalTab(tab, btn) {
+        function switchGlobalTab(tab) {
             console.log('Переключаем на вкладку:', tab);
             currentGlobalView = tab;
             
-            // Обновляем активную вкладку
+            // Обновляем активную вкладку по data-tab
             const tabs = document.querySelectorAll('.global-tab');
             console.log('Найдено вкладок:', tabs.length);
             tabs.forEach(b => b.classList.remove('active'));
-            if (btn) {
-                btn.classList.add('active');
-            }
+            const targetBtn = document.querySelector(`.global-tab[data-tab="${tab}"]`);
+            if (targetBtn) targetBtn.classList.add('active');
             
             if (tab === 'users') {
                 console.log('Вызываем showUsersList');
