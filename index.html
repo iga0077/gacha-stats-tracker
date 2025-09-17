@@ -1821,6 +1821,9 @@
             console.log('Показываем список пользователей...');
             const container = document.getElementById('statsContainer');
             
+            // Сбрасываем выбранного пользователя при входе в список/вкладки
+            selectedUser = null;
+            
             console.log('Контейнер найден:', !!container);
             if (container) {
                 console.log('Текущий HTML контейнера:', container.innerHTML.substring(0, 200) + '...');
@@ -1842,10 +1845,10 @@
             // Создаем вкладки
             const tabsHtml = `
                 <div class="global-tabs">
-                    <button class="global-tab active" onclick="switchGlobalTab('users')">Все пользователи</button>
-                    <button class="global-tab" onclick="switchGlobalTab('zzz')">Zenless Zone Zero</button>
-                    <button class="global-tab" onclick="switchGlobalTab('gfl2')">Girls' Frontline 2</button>
-                    <button class="global-tab" onclick="switchGlobalTab('genshin')">Genshin Impact</button>
+                    <button class="global-tab active" onclick="switchGlobalTab('users', this)">Все пользователи</button>
+                    <button class="global-tab" onclick="switchGlobalTab('zzz', this)">Zenless Zone Zero</button>
+                    <button class="global-tab" onclick="switchGlobalTab('gfl2', this)">Girls' Frontline 2</button>
+                    <button class="global-tab" onclick="switchGlobalTab('genshin', this)">Genshin Impact</button>
                 </div>
             `;
             
@@ -1861,22 +1864,20 @@
             const globalContent = document.getElementById('globalContent');
             console.log('globalContent создан:', !!globalContent);
             
-            switchGlobalTab('users');
+            switchGlobalTab('users', document.querySelector('.global-tab'));
         }
 
         // Переключение вкладок глобальной статистики
-        function switchGlobalTab(tab) {
+        function switchGlobalTab(tab, btn) {
             console.log('Переключаем на вкладку:', tab);
             currentGlobalView = tab;
             
             // Обновляем активную вкладку
             const tabs = document.querySelectorAll('.global-tab');
             console.log('Найдено вкладок:', tabs.length);
-            tabs.forEach(btn => {
-                btn.classList.remove('active');
-            });
-            if (event && event.target) {
-                event.target.classList.add('active');
+            tabs.forEach(b => b.classList.remove('active'));
+            if (btn) {
+                btn.classList.add('active');
             }
             
             if (tab === 'users') {
