@@ -1073,11 +1073,12 @@
             align-items: center;
             justify-content: center;
         }
-        .global-stats-btn img { height: 30px; width: auto; display: block; transition: opacity 0.2s ease; }
+        .global-stats-btn img { height: 20px; width: auto; display: block; transition: opacity 0.2s ease; }
         .global-stats-btn img:hover { opacity: 0.5; }
         .guide-btn { background: transparent; border: none; padding: 0; border-radius: 0; cursor: pointer; display:inline-flex; align-items:center; justify-content:center; }
-        .guide-btn img { height: 30px; width: auto; display: block; transition: opacity 0.2s ease; }
+        .guide-btn img { height: 20px; width: auto; display: block; transition: opacity 0.2s ease; }
         .guide-btn img:hover { opacity: 0.5; }
+        .icon-separator { width: 1px; height: 20px; background: rgba(74,144,226,0.6); margin: 0 8px; display: inline-block; }
 
         /* Стили для глобальной статистики */
         .global-tabs {
@@ -1447,6 +1448,7 @@
         </div>
             <div class="header-right">
                 <button id="guideBtn" class="guide-btn" title="Гайды" onclick="void(0)"><img src="guide.png" alt="Guides"></button>
+                <span class="icon-separator"></span>
                 <button id="globalStatsBtn" class="global-stats-btn" title="Глобальная статистика" onclick="toggleGlobalStats()"><img id="globalStatsIcon" src="all_users.png" alt="Global"></button>
                 <img id="userAvatar" class="user-avatar" src="" alt="Avatar">
                 <span id="userName" class="user-name"></span>
