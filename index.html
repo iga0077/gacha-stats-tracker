@@ -1816,6 +1816,30 @@
             }
         }
 
+        // Инициализация обработчиков вкладок глобальной статистики (делегирование)
+        function initGlobalTabs() {
+            const tabsRoot = document.querySelector('.global-tabs');
+            if (!tabsRoot) return;
+            // Снимаем пред. обработчик, если существовал
+            tabsRoot.onclick = null;
+            tabsRoot.addEventListener('click', onGlobalTabsClick);
+        }
+
+        function onGlobalTabsClick(e) {
+            const btn = e.target.closest('.global-tab');
+            if (!btn) return;
+            const tab = btn.getAttribute('data-tab');
+            if (!tab) return;
+            // Обновляем активное состояние локально в пределах контейнера
+            const tabsRoot = btn.parentElement;
+            Array.from(tabsRoot.querySelectorAll('.global-tab')).forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            // Сбрасываем выбранного пользователя, если был
+            selectedUser = null;
+            // Переключаем контент
+            switchGlobalTab(tab);
+        }
+
         // Показать список пользователей
         function showGlobalUsersList() {
             console.log('Показываем список пользователей...');
@@ -1824,11 +1848,6 @@
             // Сбрасываем выбранного пользователя при входе в список/вкладки
             selectedUser = null;
             
-            console.log('Контейнер найден:', !!container);
-            if (container) {
-                console.log('Текущий HTML контейнера:', container.innerHTML.substring(0, 200) + '...');
-            }
-            
             if (!container) {
                 console.error('Контейнер statsContainer не найден!');
                 return;
@@ -1836,34 +1855,25 @@
             
             // Скрываем элементы управления
             const headerControls = document.querySelector('.header-controls');
-            console.log('Элементы управления найдены:', !!headerControls);
             if (headerControls) {
                 headerControls.style.display = 'none';
-                console.log('Элементы управления скрыты');
             }
             
-            // Создаем вкладки
+            // Создаем вкладки без inline-обработчиков
             const tabsHtml = `
                 <div class="global-tabs">
-                    <button class="global-tab active" data-tab="users" onclick="switchGlobalTab('users')">Все пользователи</button>
-                    <button class="global-tab" data-tab="zzz" onclick="switchGlobalTab('zzz')">Zenless Zone Zero</button>
-                    <button class="global-tab" data-tab="gfl2" onclick="switchGlobalTab('gfl2')">Girls' Frontline 2</button>
-                    <button class="global-tab" data-tab="genshin" onclick="switchGlobalTab('genshin')">Genshin Impact</button>
+                    <button type="button" class="global-tab active" data-tab="users">Все пользователи</button>
+                    <button type="button" class="global-tab" data-tab="zzz">Zenless Zone Zero</button>
+                    <button type="button" class="global-tab" data-tab="gfl2">Girls' Frontline 2</button>
+                    <button type="button" class="global-tab" data-tab="genshin">Genshin Impact</button>
                 </div>
             `;
             
-            const newHtml = tabsHtml + '<div id="globalContent"></div>';
-            console.log('Новый HTML:', newHtml);
+            container.innerHTML = tabsHtml + '<div id="globalContent"></div>';
             
-            container.innerHTML = newHtml;
-            
-            console.log('HTML добавлен в контейнер');
-            console.log('Новый HTML контейнера:', container.innerHTML.substring(0, 200) + '...');
-            
-            // Проверяем, что globalContent создался
-            const globalContent = document.getElementById('globalContent');
-            console.log('globalContent создан:', !!globalContent);
-            
+            // Подключаем делегирование кликов
+            initGlobalTabs();
+            // Стартовая вкладка
             switchGlobalTab('users');
         }
 
@@ -1872,18 +1882,12 @@
             console.log('Переключаем на вкладку:', tab);
             currentGlobalView = tab;
             
-            // Обновляем активную вкладку по data-tab
-            const tabs = document.querySelectorAll('.global-tab');
-            console.log('Найдено вкладок:', tabs.length);
-            tabs.forEach(b => b.classList.remove('active'));
-            const targetBtn = document.querySelector(`.global-tab[data-tab="${tab}"]`);
-            if (targetBtn) targetBtn.classList.add('active');
+            const content = document.getElementById('globalContent');
+            if (!content) return;
             
             if (tab === 'users') {
-                console.log('Вызываем showUsersList');
                 showUsersList();
             } else {
-                console.log('Вызываем showGameComparison');
                 showGameComparison(tab);
             }
         }
