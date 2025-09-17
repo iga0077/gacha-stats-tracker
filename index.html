@@ -1063,26 +1063,22 @@
 
         /* Стили для кнопки глобальной статистики */
         .global-stats-btn {
-            background: linear-gradient(45deg, #f39c12, #e67e22);
+            background: linear-gradient(45deg, #4a90e2, #357abd);
             color: white;
             border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
+            padding: 6px 10px;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 12px;
-            font-weight: bold;
+            font-size: 14px;
             transition: all 0.3s ease;
-            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
         }
-
-        .global-stats-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 3px 10px rgba(243, 156, 18, 0.4);
-        }
-
-        .global-stats-btn.my-stats {
-            background: linear-gradient(45deg, #27ae60, #2ecc71);
-        }
+        .global-stats-btn img { height: 30px; width: auto; display: block; }
+        .guide-btn { background: rgba(30,30,50,0.8); border: 1px solid #4a90e2; padding: 6px 10px; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; display:flex; align-items:center; justify-content:center; }
+        .guide-btn img { height: 30px; width: auto; display: block; }
 
         /* Стили для глобальной статистики */
         .global-tabs {
@@ -1451,11 +1447,10 @@
             </div>
         </div>
             <div class="header-right">
-                <button id="globalStatsBtn" class="global-stats-btn" onclick="toggleGlobalStats()">Глобальная статистика</button>
-                <div class="user-info">
-                    <img id="userAvatar" class="user-avatar" src="" alt="Avatar">
-                    <span id="userName" class="user-name"></span>
-                </div>
+                <button id="guideBtn" class="guide-btn" title="Гайды" onclick="void(0)"><img src="guide.png" alt="Guides"></button>
+                <button id="globalStatsBtn" class="global-stats-btn" onclick="toggleGlobalStats()"><img id="globalStatsIcon" src="all_users.png" alt="Global"></button>
+                <img id="userAvatar" class="user-avatar" src="" alt="Avatar">
+                <span id="userName" class="user-name"></span>
                 <button class="signout-btn" onclick="signOut()">Выйти</button>
         </div>
     </div>
@@ -1740,15 +1735,19 @@
                 console.log('Возвращаемся к своей статистике');
                 isGlobalStatsMode = false;
                 selectedUser = null;
-                document.getElementById('globalStatsBtn').textContent = 'Глобальная статистика';
-                document.getElementById('globalStatsBtn').classList.remove('my-stats');
+                const btn = document.getElementById('globalStatsBtn');
+                const icon = document.getElementById('globalStatsIcon');
+                if (btn) btn.classList.remove('my-stats');
+                if (icon) icon.src = 'all_users.png';
                 showMyStats();
             } else {
                 // Переходим к глобальной статистике
                 console.log('Переходим к глобальной статистике');
                 isGlobalStatsMode = true;
-                document.getElementById('globalStatsBtn').textContent = 'Моя статистика';
-                document.getElementById('globalStatsBtn').classList.add('my-stats');
+                const btn = document.getElementById('globalStatsBtn');
+                const icon = document.getElementById('globalStatsIcon');
+                if (btn) btn.classList.add('my-stats');
+                if (icon) icon.src = 'home.png';
                 loadGlobalStats();
             }
         }
