@@ -1942,20 +1942,23 @@
                 const select = document.getElementById(selectId);
                 select.innerHTML = '<option value="">Выберите игру</option>';
                 
-                activeGames.forEach(game => {
+                activeGames.forEach((game, index) => {
                     const option = document.createElement('option');
-                    option.value = game.id;
-                    option.textContent = game.name;
+                    const value = (game && game.id) ? game.id : `idx_${index}`;
+                    option.value = value;
+                    option.textContent = game && game.name ? game.name : `Игра ${index + 1}`;
                     select.appendChild(option);
                 });
             });
 
             // Устанавливаем сохраненные значения или значения по умолчанию
-            if (getActiveGames().length > 0) {
-                const active = getActiveGames();
+            if (activeGames.length > 0) {
                 for (let i = 0; i < 3; i++) {
-                    if (!currentGameIds[i] || !active.find(g => g.id === currentGameIds[i])) {
-                        currentGameIds[i] = i < active.length ? active[i].id : null;
+                    const fallbackValue = activeGames[i] ? (activeGames[i].id || `idx_${i}`) : null;
+                    const existsById = currentGameIds[i] && activeGames.find(g => g && g.id === currentGameIds[i]);
+                    const existsByIdx = currentGameIds[i] && currentGameIds[i].startsWith('idx_') && parseInt(currentGameIds[i].slice(4), 10) < activeGames.length;
+                    if (!currentGameIds[i] || !(existsById || existsByIdx)) {
+                        currentGameIds[i] = fallbackValue;
                     }
                     document.getElementById(`gameSelect${i + 1}`).value = currentGameIds[i] || '';
                 }
@@ -1978,12 +1981,20 @@
             // Получаем выбранные игры и сохраняем их
             const selectedGames = [];
             for (let i = 0; i < count; i++) {
-                const gameId = document.getElementById(`gameSelect${i + 1}`).value;
-                if (gameId) {
-                    const game = sourceGames.find(g => g.id === gameId);
+                const value = document.getElementById(`gameSelect${i + 1}`).value;
+                let game = null;
+                if (value) {
+                    if (value.startsWith('idx_')) {
+                        const idx = parseInt(value.slice(4), 10);
+                        if (!Number.isNaN(idx) && idx >= 0 && idx < sourceGames.length) {
+                            game = sourceGames[idx];
+                        }
+                    } else {
+                        game = sourceGames.find(g => g && g.id === value) || null;
+                    }
                     if (game) selectedGames.push(game);
                 }
-                currentGameIds[i] = gameId || null;
+                currentGameIds[i] = value || null;
             }
 
             // Не сохраняем выбор интерфейса при просмотре чужого профиля
@@ -2011,6 +2022,15 @@
             // Показываем элементы управления
             document.querySelector('.header-controls').style.display = 'flex';
             
+            // При входе в просмотр чужого профиля сбрасываем выбор игр на первые доступные
+            if (isGlobalStatsMode && selectedUser) {
+                const active = getActiveGames();
+                currentGameIds[0] = active[0] ? (active[0].id || 'idx_0') : null;
+                currentGameIds[1] = null;
+                currentGameIds[2] = null;
+                document.getElementById('gameCount').value = '1';
+            }
+
             // Обновляем селекторы и статистику для выбранного пользователя (без подмены глобального games)
             updateGameSelectors();
             updateStats();
@@ -2025,6 +2045,9 @@
                 </div>
             `;
             
+            // Удаляем предыдущую вставку, если была
+            const prev = document.querySelector('.selected-user-info');
+            if (prev) prev.remove();
             // Вставляем перед statsContainer
             container.insertAdjacentHTML('beforebegin', userInfoHtml);
         }
