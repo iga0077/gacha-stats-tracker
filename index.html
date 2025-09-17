@@ -1634,9 +1634,10 @@
             const options = selectedUser.games.map((g, i) => {
                 const value = g.id || `idx_${i}`;
                 const name = g.name || `Игра ${i + 1}`;
-                const selected = (value === selectedUserGameId) ? 'selected' : '';
-                return `<option value="${value}" ${selected}>${name}</option>`;
+                const sel = (value === selectedUserGameId) ? 'selected' : '';
+                return `<option value="${value}" ${sel}>${name}</option>`;
             }).join('');
+
             bar.innerHTML = `
                 <label for="userGameSelect">Игра:</label>
                 <select id="userGameSelect" onchange="onSelectedUserGameChange(this.value)">${options}</select>
@@ -1816,37 +1817,15 @@
             }
         }
 
-        // Инициализация обработчиков вкладок глобальной статистики (делегирование)
-        function initGlobalTabs() {
-            const tabsRoot = document.querySelector('.global-tabs');
-            if (!tabsRoot) return;
-            // Снимаем пред. обработчик, если существовал
-            tabsRoot.onclick = null;
-            tabsRoot.addEventListener('click', onGlobalTabsClick);
-        }
-
-        function onGlobalTabsClick(e) {
-            const btn = e.target.closest('.global-tab');
-            if (!btn) return;
-            const tab = btn.getAttribute('data-tab');
-            if (!tab) return;
-            // Обновляем активное состояние локально в пределах контейнера
-            const tabsRoot = btn.parentElement;
-            Array.from(tabsRoot.querySelectorAll('.global-tab')).forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            // Сбрасываем выбранного пользователя, если был
-            selectedUser = null;
-            // Переключаем контент
-            switchGlobalTab(tab);
-        }
-
         // Показать список пользователей
         function showGlobalUsersList() {
             console.log('Показываем список пользователей...');
             const container = document.getElementById('statsContainer');
             
-            // Сбрасываем выбранного пользователя при входе в список/вкладки
-            selectedUser = null;
+            console.log('Контейнер найден:', !!container);
+            if (container) {
+                console.log('Текущий HTML контейнера:', container.innerHTML.substring(0, 200) + '...');
+            }
             
             if (!container) {
                 console.error('Контейнер statsContainer не найден!');
@@ -1855,25 +1834,34 @@
             
             // Скрываем элементы управления
             const headerControls = document.querySelector('.header-controls');
+            console.log('Элементы управления найдены:', !!headerControls);
             if (headerControls) {
                 headerControls.style.display = 'none';
+                console.log('Элементы управления скрыты');
             }
             
-            // Создаем вкладки без inline-обработчиков
+            // Создаем вкладки
             const tabsHtml = `
                 <div class="global-tabs">
-                    <button type="button" class="global-tab active" data-tab="users">Все пользователи</button>
-                    <button type="button" class="global-tab" data-tab="zzz">Zenless Zone Zero</button>
-                    <button type="button" class="global-tab" data-tab="gfl2">Girls' Frontline 2</button>
-                    <button type="button" class="global-tab" data-tab="genshin">Genshin Impact</button>
+                    <button class="global-tab active" onclick="switchGlobalTab('users')">Все пользователи</button>
+                    <button class="global-tab" onclick="switchGlobalTab('zzz')">Zenless Zone Zero</button>
+                    <button class="global-tab" onclick="switchGlobalTab('gfl2')">Girls' Frontline 2</button>
+                    <button class="global-tab" onclick="switchGlobalTab('genshin')">Genshin Impact</button>
                 </div>
             `;
             
-            container.innerHTML = tabsHtml + '<div id="globalContent"></div>';
+            const newHtml = tabsHtml + '<div id="globalContent"></div>';
+            console.log('Новый HTML:', newHtml);
             
-            // Подключаем делегирование кликов
-            initGlobalTabs();
-            // Стартовая вкладка
+            container.innerHTML = newHtml;
+            
+            console.log('HTML добавлен в контейнер');
+            console.log('Новый HTML контейнера:', container.innerHTML.substring(0, 200) + '...');
+            
+            // Проверяем, что globalContent создался
+            const globalContent = document.getElementById('globalContent');
+            console.log('globalContent создан:', !!globalContent);
+            
             switchGlobalTab('users');
         }
 
@@ -1882,12 +1870,21 @@
             console.log('Переключаем на вкладку:', tab);
             currentGlobalView = tab;
             
-            const content = document.getElementById('globalContent');
-            if (!content) return;
+            // Обновляем активную вкладку
+            const tabs = document.querySelectorAll('.global-tab');
+            console.log('Найдено вкладок:', tabs.length);
+            tabs.forEach(btn => {
+                btn.classList.remove('active');
+            });
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
             
             if (tab === 'users') {
+                console.log('Вызываем showUsersList');
                 showUsersList();
             } else {
+                console.log('Вызываем showGameComparison');
                 showGameComparison(tab);
             }
         }
@@ -1964,140 +1961,18 @@
             showUserStats(selectedUser);
         }
 
-        // Возвращает актуальный список игр для отображения (мои или выбранного пользователя)
-        function getActiveGames() {
-            if (selectedUser && Array.isArray(selectedUser.games)) {
-                return selectedUser.games;
-            }
-            return games;
-        }
-
-        // Управление играми
-        function updateGameSelectors() {
-            const activeGames = getActiveGames();
-            ['gameSelect1', 'gameSelect2', 'gameSelect3'].forEach(selectId => {
-                const select = document.getElementById(selectId);
-                select.innerHTML = '<option value="">Выберите игру</option>';
-                
-                activeGames.forEach((game, index) => {
-                    const option = document.createElement('option');
-                    const value = (game && game.id) ? game.id : `idx_${index}`;
-                    option.value = value;
-                    option.textContent = game && game.name ? game.name : `Игра ${index + 1}`;
-                    select.appendChild(option);
-                });
-            });
-
-            // Устанавливаем сохраненные значения или значения по умолчанию
-            if (activeGames.length > 0) {
-                for (let i = 0; i < 3; i++) {
-                    const fallbackValue = activeGames[i] ? (activeGames[i].id || `idx_${i}`) : null;
-                    const existsById = currentGameIds[i] && activeGames.find(g => g && g.id === currentGameIds[i]);
-                    const existsByIdx = currentGameIds[i] && currentGameIds[i].startsWith('idx_') && parseInt(currentGameIds[i].slice(4), 10) < activeGames.length;
-                    if (!currentGameIds[i] || !(existsById || existsByIdx)) {
-                        currentGameIds[i] = fallbackValue;
-                    }
-                    document.getElementById(`gameSelect${i + 1}`).value = currentGameIds[i] || '';
-                }
-            }
-
-            updateStats();
-        }
-
-        function updateStats() {
-            const viewMode = document.getElementById('viewMode').value;
-            if (viewMode === 'comparison') {
-                showComparison();
-                return;
-            }
-
-            const container = document.getElementById('statsContainer');
-
-            // Если просматриваем чужой профиль, используем локальный селектор и прячем стандартные контролы
-            if (selectedUser && Array.isArray(selectedUser.games)) {
-                const headerControls = document.querySelector('.header-controls');
-                if (headerControls) {
-                    // Спрятать все стандартные контролы
-                    Array.from(headerControls.children).forEach(child => {
-                        if (child.id !== 'selectedUserControls') child.style.display = 'none';
-                    });
-                    headerControls.style.display = 'flex';
-                }
-
-                const sourceGames = selectedUser.games;
-                let game = null;
-                if (selectedUserGameId) {
-                    if (selectedUserGameId.startsWith('idx_')) {
-                        const idx = parseInt(selectedUserGameId.slice(4), 10);
-                        if (!Number.isNaN(idx) && idx >= 0 && idx < sourceGames.length) {
-                            game = sourceGames[idx];
-                        }
-                    } else {
-                        game = sourceGames.find(g => g && g.id === selectedUserGameId) || null;
-                    }
-                }
-                if (!game) {
-                    game = sourceGames[0] || null;
-                }
-                if (!game) {
-                    container.innerHTML = '<div class="no-games"><p>Нет игр для отображения</p></div>';
-                    return;
-                }
-                container.innerHTML = renderGameStats(game);
-                return;
-            }
-
-            // Обычный режим (мои игры)
-            const count = parseInt(document.getElementById('gameCount').value);
-            updateGameCount();
-            
-            const sourceGames = getActiveGames();
-            // Получаем выбранные игры и сохраняем их
-            const selectedGames = [];
-            for (let i = 0; i < count; i++) {
-                const value = document.getElementById(`gameSelect${i + 1}`).value;
-                let game = null;
-                if (value) {
-                    if (value.startsWith('idx_')) {
-                        const idx = parseInt(value.slice(4), 10);
-                        if (!Number.isNaN(idx) && idx >= 0 && idx < sourceGames.length) {
-                            game = sourceGames[idx];
-                        }
-                    } else {
-                        game = sourceGames.find(g => g && g.id === value) || null;
-                    }
-                    if (game) selectedGames.push(game);
-                }
-                currentGameIds[i] = value || null;
-            }
-
-            // Не сохраняем выбор интерфейса при просмотре чужого профиля
-            if (!(selectedUser && Array.isArray(selectedUser.games))) {
-                saveInterfaceSettings();
-            }
-            
-            if (selectedGames.length === 0) {
-                container.innerHTML = '<div class="no-games"><p>Выберите игры для отображения статистики</p></div>';
-                return;
-            }
-
-            container.innerHTML = selectedGames.map(game => renderGameStats(game)).join('');
-        }
-
         // Показать статистику пользователя
         function showUserStats(user) {
             const container = document.getElementById('statsContainer');
-            
-            // Сбрасываем CSS класс контейнера для правильного отображения
             container.className = 'stats-container';
-            
+
             // Показать контейнер контролов и подготовить локальный селектор
             const headerControls = document.querySelector('.header-controls');
             if (headerControls) headerControls.style.display = 'flex';
-            
+
             // Инициализируем выбор игры пользователя
             selectedUserGameId = (user.games && user.games[0]) ? (user.games[0].id || 'idx_0') : null;
-            
+
             // Добавляем информацию о пользователе перед statsContainer
             const userInfoHtml = `
                 <div class="selected-user-info">
@@ -2107,23 +1982,229 @@
                     </div>
                 </div>
             `;
-            
+
             // Удаляем предыдущую вставку, если была
             const prev = document.querySelector('.selected-user-info');
             if (prev) prev.remove();
-            // Вставляем перед statsContainer
+            // Вставляем
             container.insertAdjacentHTML('beforebegin', userInfoHtml);
 
             // Построить локальный селектор в шапке
             populateSelectedUserGameSelect();
-            
+
             // Обновляем статистику для выбранного пользователя
             updateStats();
         }
 
+        // Показать сравнение по игре
+        function showGameComparison(gameType) {
+            const content = document.getElementById('globalContent');
+            
+            // Фильтруем пользователей с данными по этой игре
+            const gameName = {
+                'zzz': 'Zenless Zone Zero',
+                'gfl2': 'Girls Frontline 2',
+                'genshin': 'Genshin Impact'
+            }[gameType];
+            
+            console.log('Ищем игру:', gameName);
+            
+            // Ищем пользователей с игрой
+            const usersWithGame = allUsersData.filter(user => 
+                user.games.some(game => game.name === gameName)
+            );
+            
+            console.log('Пользователей с игрой', gameName, ':', usersWithGame.length);
+            console.log('Все игры у пользователей:');
+            allUsersData.forEach(user => {
+                console.log('Пользователь', user.displayName, 'игры:', user.games.map(g => g.name));
+            });
+            usersWithGame.forEach(user => {
+                const game = user.games.find(g => g.name === gameName);
+                console.log('Пользователь', user.displayName, 'игра:', game?.name);
+            });
+            
+            if (usersWithGame.length === 0) {
+                content.innerHTML = '<p class="no-data">Нет данных по этой игре</p>';
+                return;
+            }
+            
+            // Рассчитываем статистику для каждого пользователя
+            const userStats = usersWithGame.map(user => {
+                const game = user.games.find(g => g.name === gameName);
+                if (!game) return null;
+                
+                console.log('Обрабатываем игру для пользователя', user.displayName, ':', game);
+                
+                // Используем те же функции, что и в сравнении
+                const totalPulls = game.banners.reduce((sum, b) => 
+                    sum + b.pulls.reduce((bannerSum, pull) => bannerSum + pull.count, 0), 0
+                );
+                const legendaryPulls = game.banners.reduce((sum, b) => 
+                    sum + b.pulls.filter(p => p.type === 'character' || p.type === 'weapon').length, 0
+                );
+                const avgLegendary = legendaryPulls > 0 ? (totalPulls / legendaryPulls).toFixed(1) : 0;
+                
+                // Ранние крутки (по формуле как в updateStats)
+                let earlyPulls = 0;
+                let totalPullsForEarly = 0;
+                game.banners.forEach(banner => {
+                    banner.pulls.forEach(pull => {
+                        totalPullsForEarly++;
+                        const greenMax = Math.floor(banner.guarantee * 39 / 90);
+                        if (pull.count <= greenMax) {
+                            earlyPulls++;
+                        }
+                    });
+                });
+                const earlyRate = totalPullsForEarly > 0 ? ((earlyPulls / totalPullsForEarly) * 100).toFixed(1) : '0.0';
+                
+                // Самый ранний и поздний пул
+                const allPulls = game.banners.flatMap(b => b.pulls);
+                const earliestPull = allPulls.length > 0 ? Math.min(...allPulls.map(p => p.count)) : 0;
+                const latestPull = allPulls.length > 0 ? Math.max(...allPulls.map(p => p.count)) : 0;
+                
+                // Статистика ивентового баннера
+                const eventBanner = game.banners.find(b => b.type === 'event');
+                let eventWinRate = 0;
+                let eventStreaks = { maxWinStreak: 0, maxLoseStreak: 0 };
+                if (eventBanner) {
+                    const eventPulls = eventBanner.pulls.filter(p => p.eventResult && p.eventResult !== 'guarantee');
+                    const wins = eventPulls.filter(p => p.eventResult === 'win').length;
+                    eventWinRate = eventPulls.length > 0 ? (wins / eventPulls.length * 100).toFixed(1) : '0.0';
+                    eventStreaks = calculateStreaks(eventBanner.pulls);
+                }
+                
+                // Статистика оружейного баннера
+                const weaponBanner = game.banners.find(b => b.type === 'weapon');
+                let weaponWinRate = 0;
+                if (weaponBanner) {
+                    const weaponPulls = weaponBanner.pulls.filter(p => p.eventResult && p.eventResult !== 'guarantee');
+                    const wins = weaponPulls.filter(p => p.eventResult === 'win').length;
+                    weaponWinRate = weaponPulls.length > 0 ? (wins / weaponPulls.length * 100).toFixed(1) : '0.0';
+                }
+                
+                // Коэффициент удачи
+                const luckScore = calculateLuckScore(game);
+                
+                console.log('Статистика для', user.displayName, ':', {
+                    totalPulls,
+                    legendaryPulls,
+                    avgLegendary,
+                    earlyRate,
+                    earliestPull,
+                    latestPull,
+                    eventWinRate,
+                    weaponWinRate,
+                    eventStreaks,
+                    luckScore
+                });
+                
+                return {
+                    user,
+                    totalPulls,
+                    legendaryPulls,
+                    avgLegendary,
+                    earlyRate,
+                    earliestPull,
+                    latestPull,
+                    eventWinRate,
+                    weaponWinRate,
+                    eventStreaks,
+                    luckScore
+                };
+            }).filter(Boolean);
+            
+            // Создаем HTML для каждой характеристики
+            let html = '<div class="game-stats-comparison">';
+            
+            // 1. Всего круток
+            const totalPullsSorted = [...userStats].sort((a, b) => b.totalPulls - a.totalPulls);
+            html += createStatisticSection('Всего круток', totalPullsSorted, 'totalPulls');
+            
+            // 2. Легендарок
+            const legendaryPullsSorted = [...userStats].sort((a, b) => b.legendaryPulls - a.legendaryPulls);
+            html += createStatisticSection('Легендарок', legendaryPullsSorted, 'legendaryPulls');
+            
+            // 3. Средняя лега
+            const avgLegendarySorted = [...userStats].sort((a, b) => parseFloat(a.avgLegendary) - parseFloat(b.avgLegendary));
+            html += createStatisticSection('Средняя лега', avgLegendarySorted, 'avgLegendary');
+            
+            // 4. Ранние крутки
+            const earlyRateSorted = [...userStats].sort((a, b) => parseFloat(b.earlyRate) - parseFloat(a.earlyRate));
+            html += createStatisticSection('Ранние крутки (%)', earlyRateSorted, 'earlyRate');
+            
+            // 5. Самый ранний пул
+            const earliestPullSorted = [...userStats].sort((a, b) => a.earliestPull - b.earliestPull);
+            html += createStatisticSection('Самая ранняя лега', earliestPullSorted, 'earliestPull');
+            
+            // 6. Самый поздний пул
+            const latestPullSorted = [...userStats].sort((a, b) => a.latestPull - b.latestPull);
+            html += createStatisticSection('Самая поздняя лега', latestPullSorted, 'latestPull');
+            
+            // 7. Победы в ивентах
+            const eventWinRateSorted = [...userStats].sort((a, b) => b.eventWinRate - a.eventWinRate);
+            html += createStatisticSection('Победы в ивентах (%)', eventWinRateSorted, 'eventWinRate');
+            
+            // 8. Победы в оружии
+            const weaponWinRateSorted = [...userStats].sort((a, b) => b.weaponWinRate - a.weaponWinRate);
+            html += createStatisticSection('Победы в оружии (%)', weaponWinRateSorted, 'weaponWinRate');
+            
+            // 9. Серия побед
+            const winStreakSorted = [...userStats].sort((a, b) => b.eventStreaks.maxWinStreak - a.eventStreaks.maxWinStreak);
+            html += createStatisticSection('Серия побед', winStreakSorted, 'eventStreaks.maxWinStreak');
+            
+            // 10. Серия поражений
+            const loseStreakSorted = [...userStats].sort((a, b) => a.eventStreaks.maxLoseStreak - b.eventStreaks.maxLoseStreak);
+            html += createStatisticSection('Серия поражений', loseStreakSorted, 'eventStreaks.maxLoseStreak');
+            
+            // 11. Коэффициент удачи
+            const luckScoreSorted = [...userStats].sort((a, b) => b.luckScore - a.luckScore);
+            html += createStatisticSection('Коэффициент удачи', luckScoreSorted, 'luckScore');
+            
+            html += '</div>';
+            content.innerHTML = html;
+        }
+
+        // Создать секцию статистики
+        function createStatisticSection(title, sortedStats, field) {
+            let html = `<div class="stat-section">
+                <h3 class="stat-title">${title}</h3>
+                <div class="stat-users">`;
+            
+            sortedStats.forEach((stat, index) => {
+                const trophy = index < 3 ? ['🏆', '🥈', '🥉'][index] : '';
+                let value;
+                
+                if (field === 'avgLegendary' || field === 'earlyRate' || field === 'eventWinRate' || field === 'weaponWinRate') {
+                    value = stat[field];
+                } else if (field === 'luckScore') {
+                    value = Math.round(stat[field]);
+                } else if (field === 'eventStreaks.maxWinStreak') {
+                    value = stat.eventStreaks.maxWinStreak || 0;
+                } else if (field === 'eventStreaks.maxLoseStreak') {
+                    value = stat.eventStreaks.maxLoseStreak || 0;
+                } else {
+                    value = Math.round(stat[field]);
+                }
+                
+                html += `
+                    <div class="stat-user-row">
+                        <div class="stat-user-info">
+                            ${trophy} <img src="${stat.user.photoURL || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiM0YTkwZTIiLz4KPHN2ZyB4PSI4IiB5PSI4IiB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0id2hpdGUiPgo8cGF0aCBkPSJNMTIgMTJjMi4yMSAwIDQtMS43OSA0LTRzLTEuNzktNC00LTQtNCAxLjc5LTQgNCAxLjc5IDQgNCA0em0wIDJjLTIuNjcgMC04IDEuMzQtOCA0djJoMTZ2LTJjMC0yLjY2LTUuMzMtNC04LTR6Ii8+Cjwvc3ZnPgo8L3N2Zz4K'}" alt="Avatar" class="user-avatar">
+                            <span class="user-name">${stat.user.displayName}</span>
+                        </div>
+                        <div class="stat-value">${value}</div>
+                    </div>
+                `;
+            });
+            
+            html += '</div></div>';
+            return html;
+        }
+
         // Показать свою статистику
         function showMyStats() {
-            // Показываем элементы управления
             const headerControls = document.querySelector('.header-controls');
             if (headerControls) {
                 // Удаляем локальный селектор, если был
@@ -2135,20 +2216,16 @@
                 });
                 headerControls.style.display = 'flex';
             }
-            
+
             // Удаляем информацию о выбранном пользователе
             const selectedUserInfo = document.querySelector('.selected-user-info');
-            if (selectedUserInfo) {
-                selectedUserInfo.remove();
-            }
-            
+            if (selectedUserInfo) selectedUserInfo.remove();
+
             // Обнуляем состояние выбранного пользователя
             selectedUserGameId = null;
-            
-            // Обновляем селекторы игр
+
+            // Обновляем селекторы игр и статистику
             updateGameSelectors();
-            
-            // Обновляем статистику
             updateStats();
         }
 
@@ -2506,6 +2583,70 @@
             }
 
             updateStats();
+        }
+
+        function updateStats() {
+            const viewMode = document.getElementById('viewMode').value;
+            if (viewMode === 'comparison') {
+                showComparison();
+                return;
+            }
+
+            const container = document.getElementById('statsContainer');
+
+            // Просмотр чужого профиля
+            if (selectedUser && Array.isArray(selectedUser.games)) {
+                const headerControls = document.querySelector('.header-controls');
+                if (headerControls) {
+                    Array.from(headerControls.children).forEach(child => {
+                        if (child.id !== 'selectedUserControls') child.style.display = 'none';
+                    });
+                    headerControls.style.display = 'flex';
+                }
+
+                const sourceGames = selectedUser.games;
+                let game = null;
+                if (selectedUserGameId) {
+                    if (selectedUserGameId.startsWith('idx_')) {
+                        const idx = parseInt(selectedUserGameId.slice(4), 10);
+                        if (!Number.isNaN(idx) && idx >= 0 && idx < sourceGames.length) {
+                            game = sourceGames[idx];
+                        }
+                    } else {
+                        game = sourceGames.find(g => g && g.id === selectedUserGameId) || null;
+                    }
+                }
+                if (!game) game = sourceGames[0] || null;
+                if (!game) {
+                    container.innerHTML = '<div class="no-games"><p>Нет игр для отображения</p></div>';
+                    return;
+                }
+                container.innerHTML = renderGameStats(game);
+                return;
+            }
+
+            // Обычный режим (мои игры)
+            const count = parseInt(document.getElementById('gameCount').value);
+            updateGameCount();
+            
+            const selectedGames = [];
+            for (let i = 0; i < count; i++) {
+                const gameId = document.getElementById(`gameSelect${i + 1}`).value;
+                if (gameId) {
+                    const game = games.find(g => g.id === gameId);
+                    if (game) selectedGames.push(game);
+                }
+                currentGameIds[i] = gameId || null;
+            }
+
+            saveInterfaceSettings();
+
+            if (selectedGames.length === 0) {
+                container.innerHTML = '<div class="no-games"><p>Выберите игры для отображения статистики</p></div>';
+                return;
+            }
+
+            container.innerHTML = selectedGames.map(game => renderGameStats(game)).join('');
         }
 
         function renderGameStats(game) {
