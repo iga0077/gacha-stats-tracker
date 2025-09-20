@@ -188,7 +188,7 @@
 			<h1 class="page-title">Гайды</h1>
 		</div>
 		<div class="header-right">
-			<button class="icon-btn" title="На главную" onclick="window.location.href='../PWA/index.html'"><img src="home.png" alt="Home"></button>
+			<button class="icon-btn" title="На главную" onclick="window.location.href='index.html'"><img src="home.png" alt="Home"></button>
 			<div id="userProfile" class="user-profile" style="display: none;">
 				<img id="userAvatar" class="user-avatar" src="" alt="Avatar">
 				<span id="userName" class="user-name"></span>
@@ -534,7 +534,7 @@
 		// Функции авторизации
 		function signOut() {
 			auth.signOut().then(() => {
-				window.location.href = '../PWA/index.html';
+				window.location.href = 'index.html';
 			}).catch(error => {
 				console.error('Ошибка выхода:', error);
 			});
@@ -629,7 +629,7 @@
 				renderGameLists();
 			} else {
 				// Пользователь не авторизован - перенаправляем на главную
-				window.location.href = '../PWA/index.html';
+				window.location.href = 'index.html';
 			}
 		});
 
