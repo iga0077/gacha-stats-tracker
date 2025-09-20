@@ -553,7 +553,13 @@
 		}
 
 		function checkAdminAccess(user) {
-			return user && user.email === ADMIN_EMAIL;
+			const isAdmin = user && user.email === ADMIN_EMAIL;
+			console.log('Проверка админа:', {
+				userEmail: user ? user.email : 'null',
+				adminEmail: ADMIN_EMAIL,
+				isAdmin: isAdmin
+			});
+			return isAdmin;
 		}
 
 		// Загрузка данных из Firebase (публичные данные)
@@ -617,11 +623,13 @@
 		// Слушатель состояния авторизации
 		auth.onAuthStateChanged(async function(user) {
 			currentUser = user;
+			console.log('Состояние авторизации изменилось:', user ? user.email : 'null');
 			
 			if (user) {
 				// Пользователь авторизован
 				updateUserInfo(user);
 				isAdminMode = checkAdminAccess(user);
+				console.log('Режим админа установлен:', isAdminMode);
 				applyAdminMode();
 				
 				// Загружаем публичные данные гайдов
@@ -636,10 +644,24 @@
 		function setGame(game){ currentGame=game; document.getElementById('currentGameBadge').textContent = 'Игра: ' + (game==='zzz'? 'Zenless Zone Zero' : "Girls' Frontline 2"); populateFilterOptions(); renderCharacters(); updateResetButton(); applyAdminMode(); }
 
 		function applyAdminMode(){
+			console.log('Применение админ режима:', isAdminMode);
 			const adminWrap = document.getElementById('adminControls');
 			const modeBtn = document.getElementById('modeBtn');
-			if(adminWrap) adminWrap.style.display = isAdminMode? 'inline-flex':'none';
-			if(modeBtn) modeBtn.textContent = isAdminMode? '🛠️ Админ режим' : '👁️ Пользовательский режим';
+			
+			// Проверяем, является ли пользователь админом
+			const isAdmin = checkAdminAccess(currentUser);
+			
+			if(adminWrap) {
+				adminWrap.style.display = isAdmin ? 'inline-flex':'none';
+				console.log('Админ панель:', isAdmin ? 'показана' : 'скрыта');
+			}
+			
+			if(modeBtn) {
+				// Кнопка переключения режима видна только админу
+				modeBtn.style.display = isAdmin ? 'inline-block' : 'none';
+				modeBtn.textContent = isAdminMode? '🛠️ Админ режим' : '👁️ Пользовательский режим';
+			}
+			
 			// перерендер, чтобы показать/скрыть иконки на карточках
 			renderCharacters();
 			// кнопки в окне просмотра
@@ -647,7 +669,15 @@
 			if(viewAdm) viewAdm.style.display = isAdminMode? 'inline-flex' : 'none';
 		}
 
-		function toggleAdminMode(){ isAdminMode = !isAdminMode; applyAdminMode(); }
+		function toggleAdminMode(){ 
+			// Только админ может переключать режим
+			if (!checkAdminAccess(currentUser)) {
+				console.log('Переключение режима недоступно: пользователь не является админом');
+				return;
+			}
+			isAdminMode = !isAdminMode; 
+			applyAdminMode(); 
+		}
 
 		function renderCharacters(){
 			const grid=document.getElementById('charactersGrid');
