@@ -38,7 +38,7 @@
 		/* User Profile Styles */
 		.user-profile { display: flex; align-items: center; gap: 8px; }
 		.user-avatar { width: 32px; height: 32px; border-radius: 50%; border: 2px solid #4a90e2; }
-		.user-name { color: #e0e0e0; font-size: 14px; font-weight: 500; }
+		.user-name { color: #e0e0e0; font-size: 14px; font-weight: bold; }
 		.signout-btn { background: #e74c3c; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; transition: background 0.2s; }
 		.signout-btn:hover { background: #c0392b; }
 
@@ -647,9 +647,16 @@
 			console.log('Применение админ режима:', isAdminMode);
 			const adminWrap = document.getElementById('adminControls');
 			const modeBtn = document.getElementById('modeBtn');
+			const controlsWrap = document.querySelector('.controls');
 			
 			// Проверяем, является ли пользователь админом
 			const isAdmin = checkAdminAccess(currentUser);
+			
+			// Скрываем всю строку controls для обычных пользователей
+			if(controlsWrap) {
+				controlsWrap.style.display = isAdmin ? 'flex' : 'none';
+				console.log('Строка controls:', isAdmin ? 'показана' : 'скрыта');
+			}
 			
 			if(adminWrap) {
 				adminWrap.style.display = isAdmin ? 'inline-flex':'none';
@@ -681,9 +688,17 @@
 
 		function renderCharacters(){
 			const grid=document.getElementById('charactersGrid');
-			if(!currentGame){ grid.innerHTML='<div class="char-card"><div class="char-name">Выберите игру сверху.</div></div>'; return; }
+			if(!currentGame){ 
+				// Автоматически выбираем ZZZ если игра не выбрана
+				setGame('zzz');
+				return; 
+			}
 			const list = guidesData[currentGame]?.characters || [];
-			if(list.length===0){ grid.innerHTML='<div class="char-card"><div class="char-name">Нет персонажей. Нажмите "Добавить персонажа".</div></div>'; return; }
+			if(list.length===0){ 
+				const message = isAdminMode ? 'Нет персонажей. Нажмите "Добавить персонажа".' : 'Нет персонажей в базе данных.';
+				grid.innerHTML=`<div class="char-card"><div class="char-name">${message}</div></div>`; 
+				return; 
+			}
 			
 			// Apply filters and sorting
 			const filteredList = filterAndSortCharacters(list);
