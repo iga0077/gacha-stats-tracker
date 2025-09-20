@@ -9,39 +9,1312 @@
 		body { font-family: 'Arial', sans-serif; background: linear-gradient(135deg, #1a1a2e, #16213e); color: #e0e0e0; min-height: 100vh; }
 		.header { position: sticky; top: 0; height: 60px; background: rgba(20,20,40,0.95); border-bottom: 1px solid #333; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; z-index: 10; }
 		.header-left, .header-right { display: flex; align-items: center; gap: 12px; }
+		.header-right .icon-btn:first-child { margin-right: 8px; }
+		.header-center { position: absolute; left: 50%; transform: translateX(-50%); }
 		.icon-btn { background: transparent; border: none; padding: 0; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
 		.icon-btn img { height: 20px; width: auto; display: block; transition: opacity .2s ease; }
 		.icon-btn img:hover { opacity: .5; }
-		.container { max-width: 1100px; margin: 24px auto; padding: 0 16px; }
-		.title { font-size: 24px; color: #4a90e2; margin-bottom: 16px; }
-		.card { background: rgba(20,20,40,0.85); border: 1px solid #333; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
-		.card h3 { color: #e0e0e0; margin-bottom: 8px; }
-		.card p { color: #aaa; }
-		.note { color: #aaa; font-size: 13px; margin-top: 8px; }
-		.footer { text-align: center; color: #666; padding: 24px 0; font-size: 13px; }
-		.sep { width:1px; height:20px; background: rgba(74,144,226,0.6); display:inline-block; }
+		.container { max-width: 1200px; margin: 24px auto; padding: 0 16px; }
+		.page-title { font-size: 24px; color: #4a90e2;  display:flex; align-items:center; justify-content: center; gap:12px; }
+		.controls { display:flex; align-items:center; gap:10px; flex-wrap: wrap; margin: 12px 0; }
+		#adminControls { display:flex; align-items:center; gap:10px; flex-wrap: wrap; }
+		
+		/* Filter controls */
+		.filter-controls { margin: 12px 0; padding: 12px; background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid #333; }
+		.filter-row { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
+		.filter-group { display: flex; flex-direction: column; gap: 4px; min-width: 150px; }
+		.filter-group label { font-size: 12px; color: #b9c6ff; font-weight: 600; }
+		.filter-group .input, .filter-group .select { font-size: 12px; padding: 4px 6px; }
+		.select, .input, .textarea { background: rgba(30, 30, 50, 0.8); color: #e0e0e0; border: 1px solid #4a90e2; padding: 6px 8px; border-radius: 6px; font-size: 13px; }
+		.btn { background: linear-gradient(45deg, #4a90e2, #357abd); border: 1px solid #4a90e2; color: #fff; padding: 8px 12px; border-radius: 8px; cursor: pointer; transition: .2s; font-size: 13px; }
+		.btn:hover { filter: brightness(1.05); transform: translateY(-1px); }
+		.btn.secondary { background: rgba(30,30,50,0.8); color:#e0e0e0; }
+		.badge { display:inline-block; padding:4px 8px; border-radius: 6px; font-size: 12px; background: rgba(74,144,226,.15); border:1px solid #4a90e2; color:#cfe3ff; }
+		.separator { width:1px; height:20px; background: rgba(74,144,226,0.6); display:inline-block; }
+		.reset-btn { padding: 5px 12px; margin-top: 17px; background: #e74c3c; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; transition: background 0.2s; display: none; }
+		.reset-btn:hover { background: #c0392b; }
+		.reset-btn.visible { display: block; }
+		
+		/* User Profile Styles */
+		.user-profile { display: flex; align-items: center; gap: 8px; }
+		.user-avatar { width: 32px; height: 32px; border-radius: 50%; border: 2px solid #4a90e2; }
+		.user-name { color: #e0e0e0; font-size: 14px; font-weight: 500; }
+		.signout-btn { background: #e74c3c; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; transition: background 0.2s; }
+		.signout-btn:hover { background: #c0392b; }
+
+		/* Категории-баннеры */
+		.category-grid { margin: 12px 0 8px 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; align-items:center; justify-items:center; }
+		.tile { display: inline-block; width: 400px; max-width:100%; height: 120px; border-radius: 14px; overflow: hidden; border: 1px solid #333; background: rgba(20,20,40,0.85); transition: transform .2s ease, box-shadow .2s ease, opacity .2s ease; cursor: pointer; }
+		.tile img { width: 100%; height: 100%; object-fit: cover; display: block; }
+		.tile:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(74,144,226,.35); opacity: .9; }
+
+		/* Сетка персонажей: квадрат с подписью */
+		.grid { margin-top: 10px; display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 16px; }
+		.char-card { background: transparent; text-align: center; }
+		.char-img-wrap { width: 120px; height: 120px; border-radius: 12px; margin: 0 auto 6px auto; overflow: hidden; border: 1px solid #333; display:flex; align-items:center; justify-content:center; transition: transform .2s ease, box-shadow .2s ease; cursor:pointer; }
+		.char-img-wrap:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(74,144,226,.25); }
+		.char-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+		.bg-gold { background: linear-gradient(135deg, #6b5200, #b69000); }
+		.bg-violet { background: linear-gradient(135deg, #3d1f5d, #6e2bb1); }
+		.bg-orange { background: linear-gradient(135deg, #8a3a00, #ff8c00); }
+		.char-name { font-size: 13px; color: #e0e0e0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; justify-content: center; gap: 6px; }
+		.char-name-icons { display: flex; align-items: center; gap: 4px; }
+		.char-name-icons img { width: 16px; height: 16px; border-radius: 3px; }
+
+		/* Модалы */
+		.modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 100; }
+		.modal .content { background: rgba(20,20,40,0.95); border:1px solid #333; border-radius: 12px; width: 840px; max-width: 96vw; max-height: 90vh; overflow: auto; padding: 16px; }
+		.form-row { display:flex; gap:10px; margin-bottom:10px; flex-wrap: wrap; }
+		.form-col { flex:1; min-width: 220px; display:flex; flex-direction:column; gap:6px; }
+		.input, .textarea, .select { width: 100%; }
+		.form-actions { display:flex; gap:10px; justify-content:flex-end; margin-top: 10px; }
+		.hidden { display:none; }
+		.small { font-size: 12px; color: #aaa; }
+		.list { display:flex; flex-wrap: wrap; gap: 6px; }
+		.pill { display:inline-flex; align-items:center; gap:6px; padding: 4px 8px; border-radius: 999px; background: rgba(255,255,255,0.06); border:1px solid #333; }
+		.pill button { background: transparent; border:none; color:#f77; cursor:pointer; }
+		.char-actions { display:flex; gap:6px; justify-content:center; margin-top:6px; }
+
+		/* Просмотр персонажа — 5 колонок */
+		.view-modal .content { width: 1880px; max-width: 98vw; max-height: 94vh; overflow-y: auto; overflow-x: hidden; padding: 18px; }
+		.view-wrap { display: grid; grid-template-columns: 6% 14% 26% 26% 26%; gap: 14px; align-items: start; }
+		/* Блоки слотов — отдельные карточки */
+		.slot-item { background: rgba(0,0,0,0.28); border:1px solid #333; border-radius:12px; padding:10px; margin:6px 0; }
+		.slot-name { color:#8ec1ff; font-weight:700; margin-bottom:4px; }
+		.slot-value { color:#e3e7ff; }
+		.slots-box { font-size: 90%; }
+		.recommend-text { color:#fff; white-space: pre-wrap; margin-top: 12px; }
+		/* Задатки: уменьшенный шрифт содержимого */
+		.traits-box { font-size: 90%; }
+		.traits-title { font-size: 16px !important; }
+		.panel { background: rgba(18,18,34,0.92); border:1px solid #27304a; border-radius: 16px; padding: 16px; box-shadow: 0 8px 28px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,0.03); min-height: 200px; }
+		.view-title { color:#8ec1ff; font-weight: 700; margin: 2px 0 12px 0; letter-spacing: .2px; font-size: 18px; }
+		.col-banbu { display:flex; flex-direction: column; gap:12px; }
+		.col-teams { display:flex; flex-direction: column; gap:12px; }
+		.col-amps { display:flex; flex-direction: column; gap:12px; }
+		.col-disks { display:flex; flex-direction: column; gap:12px; }
+		.col-side { display:flex; flex-direction: column; gap:16px; }
+		.bb-item { display:flex; align-items:center; gap:10px; }
+		.bb-item { flex-direction: column; justify-content: flex-start; text-align: center; gap:6px; }
+		.bb-item img { width: 70px; height: 70px; border-radius: 10px; border:1px solid #333; object-fit: cover; box-shadow: 0 2px 12px rgba(0,0,0,.35); }
+		.bb-caption { font-size: 13px; color: #e0e0e0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+		.team-grid { display:grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin-top:6px; }
+		.team-slot { text-align:center; }
+		.team-slot .slot-img { width: 70px; height:70px; border-radius:10px; border:1px solid #3a3a58; object-fit: cover; margin: 0 auto 2px; display:block; box-shadow: 0 2px 12px rgba(0,0,0,.35); }
+		/* Карточки предметов */
+		.amp-item, .disk-item { display:grid; grid-template-columns: 80px 1fr; gap: 12px; padding:12px; border-radius:14px; border:1px solid #2a2a44; background: rgba(255,255,255,0.03); margin-bottom:12px; }
+		.img-wrap { width: 80px; }
+		.img-wrap .pic { width: 70px; height:70px; border-radius:10px; border:1px solid #333; object-fit: cover; display:block; margin: 0 auto; box-shadow: 0 2px 12px rgba(0,0,0,.35); }
+		.img-wrap .caption { margin-top:6px; text-align:center; font-weight:700; color:#e6ebff; font-size:13px; }
+		.key-caption { text-align: center !important; }
+		.rarity-s .pic { background: linear-gradient(135deg, #8a3a00, #ff8c00); }
+		.rarity-a .pic { background: linear-gradient(135deg, #3d1f5d, #6e2bb1); }
+		.amp-meta { font-size:12px; color:#cfd8ff; opacity:.9; }
+		.amp-desc, .disk-text { background: rgba(0,0,0,0.28); border:1px solid #333; border-radius:12px; padding:12px; font-size: 13px; color:#e3e7ff; line-height: 1.5; white-space: pre-wrap; }
+		.disk-columns { display:block; }
+		.disk-columns .disk-text + .disk-text { margin-top: 10px; }
+		.side-hero { position: relative; border-radius:16px; overflow:hidden; border:1px solid #333; background: rgba(0,0,0,0.25); }
+		.side-hero .hero-img { width:100%; height:auto; display:block; position: relative; z-index: 2; }
+		.side-hero .bar { position:absolute; right:-60px; top:40%; width: 150%; height: 46%; transform: rotate(-12deg); opacity: .9; box-shadow: 0 16px 40px rgba(0,0,0,.25); z-index: 1; }
+		.bar-s { background: linear-gradient(135deg,#ff8c00,#a44b00); }
+		.bar-a { background: linear-gradient(135deg,#6e2bb1,#3d1f5d); }
+		.side-box { background: rgba(0,0,0,0.38); border:1px solid #333; border-radius:16px; padding:16px; }
+		.row { display:flex; align-items:center; gap:10px; margin:8px 0; }
+		.kv { display:flex; gap:10px; align-items:center; font-size:14px; font-weight:600; color:#e6ebff; }
+		.badge-rank-s { color:#ffb15e; }
+		.badge-rank-a { color:#c6a1ff; }
+		.inline-icons img { width:18px; height:18px; object-fit:cover; border-radius:4px; vertical-align:middle; margin-right:6px; }
+		.trait-icon { width:56px; height:56px; border-radius:8px; border:1px solid #333; object-fit: cover; }
+		.small { font-size: 12.5px; color: #b9c6ff; }
+		.stars { display:inline-block; }
+		
+		/* Tier badges */
+		.tier-badge { position: absolute; top: 4px; left: 4px; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; color: white; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); }
+		.tier-s-plus { background: #dc2626; }
+		.tier-s { background: #f87000; }
+		.tier-a { background: #f8bc09; }
+		.tier-b { background: #22c55e; }
+		.tier-c { background: #3b82f6; }
+		
+		/* No guide badge */
+		.no-guide-badge { position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; color: white; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); background: #dc2626; white-space: nowrap; }
+		
+		/* New badge */
+		.new-badge { position: absolute; top: 4px; right: 4px; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; color: white; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); background: #22c55e; white-space: nowrap; }
+		
+		/* Tier badge sizes */
+		.char-img-wrap .tier-badge { font-size: 16px; padding: 3px 9px; }
+		.side-hero .tier-badge { font-size: 33px; padding: 12px 24px; top: 12px; left: 12px; }
+		
+		/* No guide badge sizes */
+		.char-img-wrap .no-guide-badge { font-size: 11px; }
+		.side-hero .no-guide-badge { font-size: 22px; padding: 6px 12px; bottom: 12px; z-index: 10; }
+		
+		/* Character image containers need relative positioning */
+		.char-img-wrap, .side-hero { position: relative; }
+		.star { display:inline-block; width:14px; height:14px; margin-right:2px; clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); background:#999; }
+		.stars.s .star { background:#ffb15e; }
+		.stars.a .star { background:#b28cff; }
+		.small-input { background: rgba(30,30,50,0.8); color:#e0e0e0; border:1px solid #4a90e2; padding:6px 8px; border-radius:6px; font-size:12px; width:100%; }
+		.view-actions { display:flex; gap:8px; justify-content:flex-end; margin-bottom:10px; }
+
+		/* Стили скроллбара в модальном окне под темную тему */
+		.view-modal .content { scrollbar-width: thin; scrollbar-color: #4a90e2 rgba(255,255,255,0.06); }
+		.view-modal .content::-webkit-scrollbar { width: 10px; height: 10px; }
+		.view-modal .content::-webkit-scrollbar-track { background: rgba(255,255,255,0.06); border-radius: 8px; }
+		.view-modal .content::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #4a90e2, #357abd); border-radius: 8px; border: 1px solid rgba(0,0,0,0.4); }
+		.view-modal .content::-webkit-scrollbar-thumb:hover { filter: brightness(1.1); }
+		/* GFL2 specific styles */
+		#charView.gfl2-layout { grid-template-columns: 26% 17% 8.7% 8.7% 26% !important; justify-content: center;}
+		.img-wrap.weapon { width: 250px; }
+		.img-wrap.weapon .pic { width: 100%; height: auto; object-fit: contain; }
+		.amp-item.weapon-item { grid-template-columns: 200px 1fr; }
+		.img-wrap.key { width: 100px; }
+		.img-wrap.key .pic { width: 100px; height: 100px; object-fit: contain; }
+		.disk-item.key { grid-template-columns: 100px 1fr; }
+		#charView.gfl2-layout .team-grid { gap: 1px !important; margin-bottom: 2px !important; }
+		.set-icon { width: 39px; height: 39px; object-fit: contain; }
 	</style>
+	<!-- Firebase SDK -->
+	<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 	<div class="header">
 		<div class="header-left">
-			<button class="icon-btn" title="На главную" onclick="window.location.href='index.html'"><img src="home.png" alt="Home"></button>
-			<span class="sep"></span>
-			<h1 style="font-size:16px;color:#e0e0e0;">Гайды</h1>
+		</div>
+		<div class="header-center">
+			<h1 class="page-title">Гайды</h1>
 		</div>
 		<div class="header-right">
-			<button class="icon-btn" title="Глобальная статистика" onclick="window.location.href='index.html'"><img src="all_users.png" alt="Global"></button>
+			<button class="icon-btn" title="На главную" onclick="window.location.href='../PWA/index.html'"><img src="home.png" alt="Home"></button>
+			<div id="userProfile" class="user-profile" style="display: none;">
+				<img id="userAvatar" class="user-avatar" src="" alt="Avatar">
+				<span id="userName" class="user-name"></span>
+				<button class="signout-btn" onclick="signOut()">Выйти</button>
+			</div>
 		</div>
 	</div>
 
 	<div class="container">
-		<div class="card">
-			<h3>Добро пожаловать в раздел гайдов</h3>
-			<p>Здесь скоро появятся полезные материалы по баннерам, шансам, стратегиям и анализу удачи в гача-играх.</p>
-			<p class="note">Страница в разработке. Следите за обновлениями.</p>
+		<!-- Категории -->
+		<div class="category-grid">
+			<div class="tile" onclick="setGame('zzz')" title="Zenless Zone Zero"><img src="guide_zzz.png" alt="Zenless Zone Zero"></div>
+			<div class="tile" onclick="setGame('gfl2')" title="Girls' Frontline 2"><img src="guide_gf2.png" alt="Girls' Frontline 2"></div>
+		</div>
+
+		<div class="controls">
+			<span class="badge" id="currentGameBadge">Игра: -</span>
+			<span class="separator"></span>
+			<span id="adminControls">
+				<button class="btn" onclick="openGameModal()">⚙️ Редактировать игру</button>
+				<button class="btn" onclick="openCharModal()">➕ Добавить персонажа</button>
+				<button class="btn secondary" onclick="exportGuides()">📤 Экспорт</button>
+				<label for="importFile" class="btn secondary" style="cursor:pointer;">📥 Импорт</label>
+				<input id="importFile" type="file" accept=".json" class="hidden" onchange="importGuides(event)">
+			</span>
+			<button id="modeBtn" class="btn secondary" onclick="toggleAdminMode()" title="Переключить режим">🛠️ Админ режим</button>
+		</div>
+
+		<!-- Search and Filter Controls -->
+		<div class="filter-controls">
+			<div class="filter-row">
+				<div class="filter-group">
+					<label>Поиск по имени:</label>
+					<input type="text" id="searchInput" class="input" placeholder="Введите имя персонажа..." oninput="filterCharacters()">
+				</div>
+				<div class="filter-group">
+					<label>Сортировка:</label>
+					<select id="sortSelect" class="select" onchange="filterCharacters()">
+						<option value="tier">По тиру</option>
+						<option value="alphabetical">По алфавиту</option>
+					</select>
+				</div>
+				<div class="filter-group">
+					<label>Стихия:</label>
+					<select id="elementFilter" class="select" onchange="filterCharacters()">
+						<option value="">Все стихии</option>
+					</select>
+				</div>
+				<div class="filter-group">
+					<label>Роль:</label>
+					<select id="roleFilter" class="select" onchange="filterCharacters()">
+						<option value="">Все роли</option>
+					</select>
+				</div>
+				<button id="resetBtn" class="reset-btn" onclick="resetFilters()">Сброс</button>
+			</div>
+		</div>
+
+		<div id="charactersGrid" class="grid"></div>
+	</div>
+
+	<!-- Модал игры (название, картинка, элементы, роли) -->
+	<div id="gameModal" class="modal" onclick="onBackdrop(event,'gameModal')">
+		<div class="content">
+			<h3 style="margin-bottom:10px;color:#e0e0e0;">Настройки игры</h3>
+			<div class="form-row">
+				<div class="form-col">
+					<label>Название игры</label>
+					<input id="g_name" class="input" placeholder="Название">
+				</div>
+			</div>
+			<div class="form-row">
+				<div class="form-col">
+					<label>Стихии</label>
+					<div id="g_elements" class="list"></div>
+					<div style="display:flex; gap:6px; margin-top:6px;">
+						<input id="g_el_input" class="input" placeholder="Название стихии">
+						<input id="g_el_img" class="input" placeholder="URL иконки">
+						<button class="btn secondary" onclick="addElement()">Добавить</button>
+					</div>
+				</div>
+				<div class="form-col">
+					<label>Роли</label>
+					<div id="g_roles" class="list"></div>
+					<div style="display:flex; gap:6px; margin-top:6px;">
+						<input id="g_role_input" class="input" placeholder="Название роли">
+						<input id="g_role_img" class="input" placeholder="URL иконки">
+						<button class="btn secondary" onclick="addRole()">Добавить</button>
+					</div>
+				</div>
+			</div>
+			<div class="form-actions">
+				<button class="btn secondary" onclick="closeGameModal()">Отмена</button>
+				<button class="btn" onclick="saveGame()">Сохранить</button>
+			</div>
 		</div>
 	</div>
 
-	<div class="footer">© 2025 Gacha Stats Tracker</div>
+	<!-- Модал персонажа (расширенный ZZZ) -->
+	<div id="charModal" class="modal" onclick="onBackdrop(event,'charModal')">
+		<div class="content" style="max-height:92vh;overflow:auto;">
+			<h3 id="charModalTitle" style="margin-bottom:10px;color:#e0e0e0;">Добавить персонажа</h3>
+			<!-- Базовые поля -->
+			<div class="form-row">
+				<div class="form-col">
+					<label>Имя</label>
+					<input id="c_name" class="input" placeholder="Имя">
+				</div>
+				<div class="form-col">
+					<label>Ранг</label>
+					<select id="c_rank" class="select" onchange="styleRankSelect(this)">
+						<option value="S">S</option>
+						<option value="A">A</option>
+					</select>
+				</div>
+			</div>
+			<div class="form-row">
+				<div class="form-col">
+					<label>Стихия</label>
+					<select id="c_element" class="select"></select>
+					<span class="small">Список из настроек игры (с иконками: появится в просмотре)</span>
+				</div>
+				<div class="form-col">
+					<label>Роль</label>
+					<select id="c_role" class="select"></select>
+				</div>
+			</div>
+			<div class="form-row">
+				<div class="form-col">
+					<label>URL иконки персонажа</label>
+					<input id="c_image" class="input" placeholder="https://.../icon.png">
+				</div>
+				<div class="form-col">
+					<label>URL арта персонажа</label>
+					<input id="c_art" class="input" placeholder="https://.../art.png">
+				</div>
+			</div>
+
+			<!-- Тир и Наличие гайда -->
+			<div class="form-row">
+				<div class="form-col">
+					<label>Тир</label>
+					<select id="c_tier" class="select">
+						<option value="S+">S+</option>
+						<option value="S">S</option>
+						<option value="A">A</option>
+						<option value="B">B</option>
+						<option value="C">C</option>
+					</select>
+				</div>
+				<div class="form-col">
+					<label>Наличие гайда</label>
+					<div style="display: flex; align-items: center; gap: 8px;">
+						<input type="checkbox" id="c_hasGuide" style="width: 16px; height: 16px;">
+						<span style="color: #e0e0e0; font-size: 13px;">Есть гайд</span>
+					</div>
+				</div>
+			</div>
+
+			<!-- Новый персонаж -->
+			<div class="form-row">
+				<div class="form-col">
+					<label>Новый персонаж</label>
+					<div style="display: flex; align-items: center; gap: 8px;">
+						<input type="checkbox" id="c_isNew" style="width: 16px; height: 16px;">
+						<span style="color: #e0e0e0; font-size: 13px;">Отметить как новый</span>
+					</div>
+				</div>
+			</div>
+
+			<!-- ZZZ Fields -->
+			<div id="zzzFields">
+				<!-- Задатки (2 строки) -->
+				<h4 class="view-title">Задатки</h4>
+				<div class="form-row">
+					<div class="form-col">
+						<label>URL изображения</label>
+						<input id="t1_img" class="input" placeholder="https://.../trait.png">
+					</div>
+					<div class="form-col">
+						<label>Название</label>
+						<input id="t1_name" class="input" placeholder="Название">
+					</div>
+				</div>
+				<div class="form-row">
+					<div class="form-col">
+						<label>URL изображения</label>
+						<input id="t2_img" class="input" placeholder="https://.../trait.png">
+					</div>
+					<div class="form-col">
+						<label>Название</label>
+						<input id="t2_name" class="input" placeholder="Название">
+					</div>
+				</div>
+
+				<!-- Рекомендуемые значения характеристик -->
+				<h4 class="view-title">Рекомендуемые значения характеристик</h4>
+				<div class="form-row">
+					<div class="form-col"><label>Слот 4</label><input id="s_slot4" class="input"></div>
+					<div class="form-col"><label>Слот 5</label><input id="s_slot5" class="input"></div>
+				</div>
+				<div class="form-row">
+					<div class="form-col"><label>Слот 6</label><input id="s_slot6" class="input"></div>
+					<div class="form-col"><label>Доп.</label><input id="s_extra" class="input"></div>
+				</div>
+				<div class="form-col"><label>Необходимые значения</label><textarea id="s_recommended" class="textarea" placeholder="Подробные пояснения..."></textarea></div>
+
+				<!-- Драйв-диски (динамический список) -->
+				<h4 class="view-title" style="margin-top:10px;">Драйв-диски</h4>
+				<div id="drivesBox"></div>
+				<div class="form-actions"><button class="btn secondary" onclick="addDrive()">+ Добавить диск</button></div>
+
+				<!-- Амплификаторы (динамический список) -->
+				<h4 class="view-title" style="margin-top:10px;">Амплификаторы</h4>
+				<div id="ampsBox"></div>
+				<div class="form-actions"><button class="btn secondary" onclick="addAmp()">+ Добавить амплификатор</button></div>
+
+				<!-- Команды (динамический список по 3 слота) -->
+				<h4 class="view-title" style="margin-top:10px;">Команды</h4>
+				<div id="teamsBox"></div>
+				<div class="form-actions"><button class="btn secondary" onclick="addTeam()">+ Добавить команду</button></div>
+
+				<!-- Банбу (динамический список) -->
+				<h4 class="view-title" style="margin-top:10px;">Банбу</h4>
+				<div id="bangbooBox"></div>
+				<div class="form-actions"><button class="btn secondary" onclick="addBangboo()">+ Добавить банбу</button></div>
+			</div>
+
+			<!-- GFL2 Fields -->
+			<div id="gfl2Fields" style="display:none;">
+				<!-- Сет (1-2 предмета) -->
+				<h4 class="view-title">Сет</h4>
+				<div class="form-row">
+					<div class="form-col">
+						<label>URL изображения</label>
+						<input id="set1_img" class="input" placeholder="https://.../set1.png">
+					</div>
+					<div class="form-col">
+						<label>Название</label>
+						<input id="set1_name" class="input" placeholder="Название">
+					</div>
+				</div>
+				<div class="form-row">
+					<div class="form-col">
+						<label>URL изображения</label>
+						<input id="set2_img" class="input" placeholder="https://.../set2.png">
+					</div>
+					<div class="form-col">
+						<label>Название</label>
+						<input id="set2_name" class="input" placeholder="Название">
+					</div>
+				</div>
+
+				<!-- Характеристики в обвесах -->
+				<h4 class="view-title">Характеристики в обвесах</h4>
+				<div class="form-col"><textarea id="characteristics" class="textarea" placeholder="Каждая характеристика с новой строки..."></textarea></div>
+
+				<!-- Итоговые характеристики -->
+				<h4 class="view-title">Итоговые характеристики</h4>
+				<div class="form-col"><textarea id="final_stats" class="textarea" placeholder="Итоговые значения характеристик..."></textarea></div>
+
+				<!-- Оружие (динамический список) -->
+				<h4 class="view-title" style="margin-top:10px;">Оружие</h4>
+				<div id="weaponsBox"></div>
+				<div class="form-actions"><button class="btn secondary" onclick="addWeapon()">+ Добавить оружие</button></div>
+
+				<!-- Команды (динамический список по 4-5 слотов) -->
+				<h4 class="view-title" style="margin-top:10px;">Команды</h4>
+				<div id="teamsBoxGFL2"></div>
+				<div class="form-actions"><button class="btn secondary" onclick="addTeamGFL2()">+ Добавить команду</button></div>
+
+				<!-- Личные ключи (3 фиксированных) -->
+				<h4 class="view-title" style="margin-top:10px;">Личные ключи</h4>
+				<div id="personalKeysBox"></div>
+
+				<!-- Общие ключи (динамический список) -->
+				<h4 class="view-title" style="margin-top:10px;">Общие ключи</h4>
+				<div id="generalKeysBox"></div>
+				<div class="form-actions"><button class="btn secondary" onclick="addGeneralKey()">+ Добавить ключ</button></div>
+			</div>
+
+			<div class="form-actions">
+				<button class="btn secondary" onclick="closeCharModal()">Отмена</button>
+				<button class="btn" onclick="saveCharacter()">Сохранить</button>
+			</div>
+		</div>
+	</div>
+
+	<div id="charViewModal" class="modal view-modal" onclick="onBackdrop(event,'charViewModal')">
+		<div class="content">
+			<div class="view-actions">
+				<span id="viewAdminActions">
+					<button class="btn" onclick="openDetailEditor()">Редактировать данные</button>
+				</span>
+			</div>
+			<div id="charView" class="view-wrap"></div>
+		</div>
+	</div>
+
+	<!-- Редактор detail как JSON -->
+	<div id="detailEditor" class="modal" onclick="onBackdrop(event,'detailEditor')">
+		<div class="content">
+			<h3 style="margin-bottom:8px;color:#e0e0e0;">Редактирование данных персонажа (detail)</h3>
+			<textarea id="detailJson" class="textarea" style="min-height:300px"></textarea>
+			<div class="form-actions">
+				<button class="btn secondary" onclick="closeDetailEditor()">Отмена</button>
+				<button class="btn" onclick="saveDetailJson()">Сохранить</button>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		// Firebase конфигурация
+		const firebaseConfig = {
+			apiKey: "AIzaSyBrlOVpLyaQC-j35jKI6dpUROeJ4Q2dXaU",
+			authDomain: "igatrackers.firebaseapp.com",
+			projectId: "igatrackers",
+			storageBucket: "igatrackers.firebasestorage.app",
+			messagingSenderId: "629727578641",
+			appId: "1:629727578641:web:c85bd10081c56e0e283fb0",
+			measurementId: "G-MZ6W6B5MTX"
+		};
+
+		// Инициализация Firebase
+		firebase.initializeApp(firebaseConfig);
+		const auth = firebase.auth();
+		const db = firebase.firestore();
+
+		// Админ email
+		const ADMIN_EMAIL = "igor.sinenko07@gmail.com";
+
+		// localStorage schema (теперь используется только для кеширования)
+		const LS_KEY = 'guidesDataV2';
+		let currentGame = null; // 'zzz' | 'gfl2'
+		let editingCharId = null;
+		let isAdminMode = false; // Будет установлено после проверки авторизации
+		let currentUser = null;
+		let guidesData = {
+			zzz: { name: 'Zenless Zone Zero', elements: [], roles: [], characters: [] },
+			gfl2: { name: "Girls' Frontline 2", elements: [], roles: [], characters: [] }
+		};
+
+		// Функции авторизации
+		function signOut() {
+			auth.signOut().then(() => {
+				window.location.href = '../PWA/index.html';
+			}).catch(error => {
+				console.error('Ошибка выхода:', error);
+			});
+		}
+
+		function updateUserInfo(user) {
+			const userProfile = document.getElementById('userProfile');
+			const userAvatar = document.getElementById('userAvatar');
+			const userName = document.getElementById('userName');
+			
+			if (userProfile && userAvatar && userName) {
+				userAvatar.src = user.photoURL || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiM0YTkwZTIiLz4KPHN2ZyB4PSI4IiB5PSI4IiB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDEyQzE0LjIwOTEgMTIgMTYgMTAuMjA5MSAxNiA4QzE2IDUuNzkwODYgMTQuMjA5MSA0IDEyIDRDOS43OTA4NiA0IDggNS43OTA4NiA4IDhDOCAxMC4yMDkxIDkuNzkwODYgMTIgMTIgMTJaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNMTIgMTRDOC42ODYyOSAxNCA2IDE2LjY4NjMgNiAyMEgxOEMxOCAxNi42ODYzIDE1LjMxMzcgMTQgMTIgMTRaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4KPC9zdmc+';
+				userName.textContent = user.displayName || 'Пользователь';
+				userProfile.style.display = 'flex';
+			}
+		}
+
+		function checkAdminAccess(user) {
+			return user && user.email === ADMIN_EMAIL;
+		}
+
+		// Загрузка данных из Firebase (публичные данные)
+		async function loadData() {
+			try {
+				// Загружаем данные из публичной коллекции guides
+				const doc = await db.collection('guides').doc('public').get();
+				if (doc.exists) {
+					const data = doc.data();
+					if (data.zzz && data.gfl2) {
+						guidesData = data;
+						console.log('Публичные данные гайдов загружены из Firebase');
+					}
+				} else {
+					console.log('Публичные данные гайдов не найдены, используем пустые');
+				}
+			} catch (error) {
+				console.error('Ошибка загрузки публичных данных гайдов:', error);
+				// Fallback на localStorage
+				try {
+					const raw = localStorage.getItem(LS_KEY);
+					if (raw) {
+						const d = JSON.parse(raw);
+						if (d?.zzz && d?.gfl2) guidesData = d;
+					}
+				} catch (e) {
+					console.error('Ошибка загрузки из localStorage:', e);
+				}
+			}
+		}
+
+		// Сохранение данных в Firebase (только для админа)
+		async function saveData() {
+			if (!currentUser || !isAdminMode) {
+				console.log('Сохранение недоступно: пользователь не авторизован или не является админом');
+				return;
+			}
+			
+			try {
+				// Сохраняем в публичную коллекцию guides
+				await db.collection('guides').doc('public').set({
+					...guidesData,
+					lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
+					updatedBy: currentUser.email
+				});
+				console.log('Публичные данные гайдов сохранены в Firebase');
+				
+				// Также сохраняем в localStorage как backup
+				localStorage.setItem(LS_KEY, JSON.stringify(guidesData));
+			} catch (error) {
+				console.error('Ошибка сохранения данных гайдов:', error);
+				// Fallback на localStorage
+				try {
+					localStorage.setItem(LS_KEY, JSON.stringify(guidesData));
+				} catch (e) {
+					console.error('Ошибка сохранения в localStorage:', e);
+				}
+			}
+		}
+
+		// Слушатель состояния авторизации
+		auth.onAuthStateChanged(async function(user) {
+			currentUser = user;
+			
+			if (user) {
+				// Пользователь авторизован
+				updateUserInfo(user);
+				isAdminMode = checkAdminAccess(user);
+				applyAdminMode();
+				
+				// Загружаем публичные данные гайдов
+				await loadData();
+				renderGameLists();
+			} else {
+				// Пользователь не авторизован - перенаправляем на главную
+				window.location.href = '../PWA/index.html';
+			}
+		});
+
+		function setGame(game){ currentGame=game; document.getElementById('currentGameBadge').textContent = 'Игра: ' + (game==='zzz'? 'Zenless Zone Zero' : "Girls' Frontline 2"); populateFilterOptions(); renderCharacters(); updateResetButton(); applyAdminMode(); }
+
+		function applyAdminMode(){
+			const adminWrap = document.getElementById('adminControls');
+			const modeBtn = document.getElementById('modeBtn');
+			if(adminWrap) adminWrap.style.display = isAdminMode? 'inline-flex':'none';
+			if(modeBtn) modeBtn.textContent = isAdminMode? '🛠️ Админ режим' : '👁️ Пользовательский режим';
+			// перерендер, чтобы показать/скрыть иконки на карточках
+			renderCharacters();
+			// кнопки в окне просмотра
+			const viewAdm = document.getElementById('viewAdminActions');
+			if(viewAdm) viewAdm.style.display = isAdminMode? 'inline-flex' : 'none';
+		}
+
+		function toggleAdminMode(){ isAdminMode = !isAdminMode; applyAdminMode(); }
+
+		function renderCharacters(){
+			const grid=document.getElementById('charactersGrid');
+			if(!currentGame){ grid.innerHTML='<div class="char-card"><div class="char-name">Выберите игру сверху.</div></div>'; return; }
+			const list = guidesData[currentGame]?.characters || [];
+			if(list.length===0){ grid.innerHTML='<div class="char-card"><div class="char-name">Нет персонажей. Нажмите "Добавить персонажа".</div></div>'; return; }
+			
+			// Apply filters and sorting
+			const filteredList = filterAndSortCharacters(list);
+			
+			grid.innerHTML = filteredList.map(ch=>{
+				const bg = ch.rank==='S' ? 'bg-orange' : 'bg-violet';
+				const actionsHtml = isAdminMode ? `
+						<div class="char-actions">
+							<button class="btn secondary" title="Редактировать" onclick="openCharModal('${ch.id}')">✏️</button>
+							<button class="btn secondary" title="Удалить" onclick="deleteCharacter('${ch.id}')">🗑️</button>
+						</div>
+					` : '';
+				const tierClass = `tier-${ch.tier?.toLowerCase().replace('+', '-plus') || 's'}`;
+				const tierBadge = ch.tier ? `<div class="tier-badge ${tierClass}">${ch.tier}</div>` : '';
+				const noGuideBadge = !ch.hasGuide ? '<div class="no-guide-badge">Нет гайда</div>' : '';
+				const newBadge = ch.isNew ? '<div class="new-badge">New</div>' : '';
+				
+				// Get element and role icons
+				const game = guidesData[currentGame];
+				const elementIcon = (game.elements || []).find(e => e.name === ch.element)?.imageUrl || '';
+				const roleIcon = (game.roles || []).find(r => r.name === ch.role)?.imageUrl || '';
+				const nameIcons = `
+					<div class="char-name-icons">
+						${elementIcon ? `<img src="${elementIcon}" alt="${ch.element}" title="${ch.element}">` : ''}
+					</div>
+				`;
+				
+				return `
+					<div class="char-card">
+						<div class="char-img-wrap ${bg}" title="${ch.name}" onclick="openCharView('${ch.id}')">
+							${ch.imageUrl? `<img class='char-img' src='${ch.imageUrl}' alt='${ch.name}'>` : ''}
+							${tierBadge}
+							${noGuideBadge}
+							${newBadge}
+						</div>
+						<div class="char-name">
+							${roleIcon ? `<img src="${roleIcon}" alt="${ch.role}" title="${ch.role}" style="width: 16px; height: 16px; border-radius: 3px;">` : ''}
+							<span>${ch.name}</span>
+							${nameIcons}
+						</div>
+						${actionsHtml}
+					</div>
+				`;
+			}).join('');
+		}
+
+		function filterAndSortCharacters(list) {
+			// Get filter values
+			const searchTerm = document.getElementById('searchInput')?.value.toLowerCase() || '';
+			const elementFilter = document.getElementById('elementFilter')?.value || '';
+			const roleFilter = document.getElementById('roleFilter')?.value || '';
+			const sortBy = document.getElementById('sortSelect')?.value || 'tier';
+
+			// Filter characters
+			let filtered = list.filter(ch => {
+				const matchesSearch = !searchTerm || ch.name.toLowerCase().includes(searchTerm);
+				const matchesElement = !elementFilter || ch.element === elementFilter;
+				const matchesRole = !roleFilter || ch.role === roleFilter;
+				return matchesSearch && matchesElement && matchesRole;
+			});
+
+			// Sort characters
+			filtered.sort((a, b) => {
+				if (sortBy === 'alphabetical') {
+					return a.name.localeCompare(b.name);
+				} else if (sortBy === 'tier') {
+					const tierOrder = { 'S+': 0, 'S': 1, 'A': 2, 'B': 3, 'C': 4 };
+					const aTier = tierOrder[a.tier] ?? 5;
+					const bTier = tierOrder[b.tier] ?? 5;
+					return aTier - bTier;
+				}
+				return 0;
+			});
+
+			return filtered;
+		}
+
+		function filterCharacters() {
+			renderCharacters();
+			updateResetButton();
+		}
+
+		function updateResetButton() {
+			const resetBtn = document.getElementById('resetBtn');
+			if (!resetBtn) return;
+			
+			const searchTerm = document.getElementById('searchInput')?.value || '';
+			const elementFilter = document.getElementById('elementFilter')?.value || '';
+			const roleFilter = document.getElementById('roleFilter')?.value || '';
+			const sortBy = document.getElementById('sortSelect')?.value || 'tier';
+			
+			const hasFilters = searchTerm || elementFilter || roleFilter || sortBy !== 'tier';
+			resetBtn.classList.toggle('visible', hasFilters);
+		}
+
+		function resetFilters() {
+			document.getElementById('searchInput').value = '';
+			document.getElementById('elementFilter').value = '';
+			document.getElementById('roleFilter').value = '';
+			document.getElementById('sortSelect').value = 'tier';
+			renderCharacters();
+			updateResetButton();
+		}
+
+		function populateFilterOptions() {
+			if (!currentGame) return;
+			
+			const game = guidesData[currentGame];
+			const elementSelect = document.getElementById('elementFilter');
+			const roleSelect = document.getElementById('roleFilter');
+			
+			// Populate element filter
+			if (elementSelect) {
+				const currentElement = elementSelect.value;
+				elementSelect.innerHTML = '<option value="">Все стихии</option>';
+				(game.elements || []).forEach(el => {
+					elementSelect.innerHTML += `<option value="${el.name}">${el.name}</option>`;
+				});
+				elementSelect.value = currentElement;
+			}
+			
+			// Populate role filter
+			if (roleSelect) {
+				const currentRole = roleSelect.value;
+				roleSelect.innerHTML = '<option value="">Все роли</option>';
+				(game.roles || []).forEach(role => {
+					roleSelect.innerHTML += `<option value="${role.name}">${role.name}</option>`;
+				});
+				roleSelect.value = currentRole;
+			}
+			
+			updateResetButton();
+		}
+
+		function onBackdrop(e,id){ if(e.target.id===id) document.getElementById(id).style.display='none'; }
+
+		function openGameModal(){
+			if(!currentGame){ alert('Сначала выберите игру кликом по баннеру.'); return; }
+			const game = guidesData[currentGame];
+			document.getElementById('g_name').value = game.name || '';
+			renderGameLists();
+			document.getElementById('gameModal').style.display='flex';
+		}
+		function closeGameModal(){ document.getElementById('gameModal').style.display='none'; }
+		function renderGameLists(){
+			const elBox=document.getElementById('g_elements');
+			const rlBox=document.getElementById('g_roles');
+			const game = guidesData[currentGame];
+			elBox.innerHTML = (game.elements||[]).map((el,i)=>`<span class='pill'>${el.imageUrl?`<img src='${el.imageUrl}' style='height:16px;width:16px;border-radius:4px;'> `:''}${el.name}<button onclick='removeElement(${i})'>×</button></span>`).join('');
+			rlBox.innerHTML = (game.roles||[]).map((r,i)=>`<span class='pill'>${r.imageUrl?`<img src='${r.imageUrl}' style='height:16px;width:16px;border-radius:4px;'> `:''}${r.name}<button onclick='removeRole(${i})'>×</button></span>`).join('');
+		}
+		async function addElement(){ const name=document.getElementById('g_el_input').value.trim(); const img=document.getElementById('g_el_img').value.trim(); if(!name) return; guidesData[currentGame].elements.push({name, imageUrl: img}); document.getElementById('g_el_input').value=''; document.getElementById('g_el_img').value=''; renderGameLists(); await saveData(); populateCharSelects(); populateFilterOptions(); }
+		async function removeElement(i){ guidesData[currentGame].elements.splice(i,1); renderGameLists(); await saveData(); populateCharSelects(); populateFilterOptions(); }
+		async function addRole(){ const name=document.getElementById('g_role_input').value.trim(); const img=document.getElementById('g_role_img').value.trim(); if(!name) return; guidesData[currentGame].roles.push({name, imageUrl: img}); document.getElementById('g_role_input').value=''; document.getElementById('g_role_img').value=''; renderGameLists(); await saveData(); populateCharSelects(); populateFilterOptions(); }
+		async function removeRole(i){ guidesData[currentGame].roles.splice(i,1); renderGameLists(); await saveData(); populateCharSelects(); populateFilterOptions(); }
+		async function saveGame(){ const g=guidesData[currentGame]; g.name=document.getElementById('g_name').value.trim(); await saveData(); closeGameModal(); document.getElementById('currentGameBadge').textContent='Игра: '+g.name; populateFilterOptions(); }
+
+		function uuid(){ return 'id-'+Math.random().toString(36).slice(2,9)+Date.now().toString(36).slice(4); }
+		function openCharModal(id){
+			if(!currentGame) { alert('Выберите игру'); return; }
+			editingCharId = id || null;
+			const list = guidesData[currentGame].characters || [];
+			const ch = editingCharId? list.find(x=>x.id===editingCharId) : null;
+			_g('charModalTitle').textContent = ch? 'Редактировать персонажа' : 'Добавить персонажа';
+			_g('c_name').value = ch?.name || '';
+			_g('c_image').value = ch?.imageUrl || '';
+			_g('c_art').value = ch?.detail?.sidebar?.fullImageUrl || '';
+			_g('c_rank').value = ch?.rank || 'S'; styleRankSelect(_g('c_rank'));
+			_g('c_tier').value = ch?.tier || 'S+';
+			_g('c_hasGuide').checked = ch?.hasGuide !== false;
+			_g('c_isNew').checked = ch?.isNew === true;
+			populateCharSelects(ch);
+			
+			// Show/hide fields based on game
+			_g('zzzFields').style.display = currentGame === 'zzz' ? 'block' : 'none';
+			_g('gfl2Fields').style.display = currentGame === 'gfl2' ? 'block' : 'none';
+			
+			if(currentGame === 'zzz') {
+				// ZZZ fields
+				_g('t1_img').value = ch?.detail?.traits?.[0]?.imageUrl || '';
+				_g('t1_name').value = ch?.detail?.traits?.[0]?.name || '';
+				_g('t2_img').value = ch?.detail?.traits?.[1]?.imageUrl || '';
+				_g('t2_name').value = ch?.detail?.traits?.[1]?.name || '';
+				_g('s_slot4').value = ch?.detail?.slots?.slot4 || '';
+				_g('s_slot5').value = ch?.detail?.slots?.slot5 || '';
+				_g('s_slot6').value = ch?.detail?.slots?.slot6 || '';
+				_g('s_extra').value = ch?.detail?.slots?.extra || '';
+				_g('s_recommended').value = ch?.detail?.recommended || '';
+				_detail = {
+					drives: JSON.parse(JSON.stringify(ch?.detail?.driveDisks || [])),
+					amps: JSON.parse(JSON.stringify(ch?.detail?.amplifiers || [])),
+					teams: JSON.parse(JSON.stringify(ch?.detail?.teams || [])),
+					bangbooList: JSON.parse(JSON.stringify(ch?.detail?.bangbooList || []))
+				};
+				renderDrives(_detail.drives); renderAmps(_detail.amps); renderTeams(_detail.teams); renderBangboo(_detail.bangbooList);
+			} else if(currentGame === 'gfl2') {
+				// GFL2 fields
+				_g('set1_img').value = ch?.detail?.set?.[0]?.imageUrl || '';
+				_g('set1_name').value = ch?.detail?.set?.[0]?.name || '';
+				_g('set2_img').value = ch?.detail?.set?.[1]?.imageUrl || '';
+				_g('set2_name').value = ch?.detail?.set?.[1]?.name || '';
+				_g('characteristics').value = ch?.detail?.characteristics || '';
+				_g('final_stats').value = ch?.detail?.finalStats || '';
+				_detail = {
+					weapons: JSON.parse(JSON.stringify(ch?.detail?.weapons || [])),
+					teams: JSON.parse(JSON.stringify(ch?.detail?.teams || [])),
+					personalKeys: JSON.parse(JSON.stringify(ch?.detail?.personalKeys || [{imageUrl:'',name:''},{imageUrl:'',name:''},{imageUrl:'',name:''}])),
+					generalKeys: JSON.parse(JSON.stringify(ch?.detail?.generalKeys || []))
+				};
+				renderWeapons(_detail.weapons); renderTeamsGFL2(_detail.teams); renderPersonalKeys(_detail.personalKeys); renderGeneralKeys(_detail.generalKeys);
+			}
+			_g('charModal').style.display='flex';
+		}
+		function closeCharModal(){ document.getElementById('charModal').style.display='none'; }
+		function populateCharSelects(ch){
+			const elSel=document.getElementById('c_element'); const rlSel=document.getElementById('c_role');
+			const game=guidesData[currentGame];
+			elSel.innerHTML = (game.elements||[]).map(o=>`<option value="${o.name}">${o.name}</option>`).join('');
+			rlSel.innerHTML = (game.roles||[]).map(o=>`<option value="${o.name}">${o.name}</option>`).join('');
+			if(ch){ if(ch.element) elSel.value=ch.element; if(ch.role) rlSel.value=ch.role; }
+		}
+		async function saveCharacter(){
+			const name = _g('c_name').value.trim(); if(!name){ alert('Введите имя'); return; }
+			const base = {
+				name,
+				rank: _g('c_rank').value,
+				element: _g('c_element').value,
+				role: _g('c_role').value,
+				imageUrl: _g('c_image').value.trim(),
+				tier: _g('c_tier').value,
+				hasGuide: _g('c_hasGuide').checked,
+				isNew: _g('c_isNew').checked
+			};
+			
+			let detail = {};
+			if(currentGame === 'zzz') {
+				detail = {
+					sidebar: { fullImageUrl: _g('c_art').value.trim(), name: name, rank: base.rank, element: base.element, role: base.role },
+					traits: [ {imageUrl:_g('t1_img').value.trim(), name:_g('t1_name').value.trim()}, {imageUrl:_g('t2_img').value.trim(), name:_g('t2_name').value.trim()} ],
+					slots: { slot4:_g('s_slot4').value.trim(), slot5:_g('s_slot5').value.trim(), slot6:_g('s_slot6').value.trim(), extra:_g('s_extra').value.trim() },
+					recommended: _g('s_recommended').value.trim(),
+					driveDisks: _detail.drives.map((d,i)=>({ imageUrl:_g(`d_img_${i}`).value.trim(), name:_g(`d_name_${i}`).value.trim(), left:_g(`d_left_${i}`).value.trim(), right:_g(`d_right_${i}`).value.trim() })),
+					amplifiers: _detail.amps.map((a,i)=>({ imageUrl:_g(`a_img_${i}`).value.trim(), name:_g(`a_name_${i}`).value.trim(), stars:_g(`a_stars_${i}`).value.trim(), attack:_g(`a_atk_${i}`).value.trim(), summary:_g(`a_summary_${i}`).value.trim(), description:_g(`a_desc_${i}`).value.trim() })),
+					teams: _detail.teams.map((t,i)=>({ ally2Id: _g(`t_${i}_a2`).value, ally3Id: _g(`t_${i}_a3`).value })),
+					bangbooList: _detail.bangbooList.map((b,i)=>({ imageUrl: _g(`bb_img_${i}`).value.trim(), name: _g(`bb_name_${i}`).value.trim() }))
+				};
+			} else if(currentGame === 'gfl2') {
+				detail = {
+					sidebar: { fullImageUrl: _g('c_art').value.trim(), name: name, rank: base.rank, element: base.element, role: base.role },
+					set: [ {imageUrl:_g('set1_img').value.trim(), name:_g('set1_name').value.trim()}, {imageUrl:_g('set2_img').value.trim(), name:_g('set2_name').value.trim()} ],
+					characteristics: _g('characteristics').value.trim(),
+					finalStats: _g('final_stats').value.trim(),
+					weapons: _detail.weapons.map((w,i)=>({ imageUrl:_g(`w_img_${i}`).value.trim(), name:_g(`w_name_${i}`).value.trim(), rarity:_g(`w_rarity_${i}`).value })),
+					teams: _detail.teams.map((t,i)=>({ members: Array.from({length:5}, (_,j)=>_g(`t_${i}_m${j+1}`)?.value || '') })),
+					personalKeys: _detail.personalKeys.map((k,i)=>({ imageUrl:_g(`pk_img_${i}`).value.trim(), name:_g(`pk_name_${i}`).value.trim() })),
+					generalKeys: _detail.generalKeys.map((k,i)=>({ imageUrl:_g(`gk_img_${i}`).value.trim(), name:_g(`gk_name_${i}`).value.trim() }))
+				};
+			}
+			
+			const list = guidesData[currentGame].characters || (guidesData[currentGame].characters=[]);
+			if(editingCharId){
+				const idx=list.findIndex(x=>x.id===editingCharId); if(idx>=0){ list[idx] = { ...list[idx], ...base, detail, updatedAt: Date.now() }; }
+			}else{
+				list.push({ id: uuid(), ...base, detail, createdAt: Date.now(), updatedAt: Date.now() });
+			}
+			await saveData(); closeCharModal(); renderCharacters();
+		}
+
+		function exportGuides(){ const blob=new Blob([JSON.stringify(guidesData,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='guides_export.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); }
+		function importGuides(e){ const f=e.target.files?.[0]; if(!f) return; const r=new FileReader(); r.onload=async ()=>{ try{ const data=JSON.parse(r.result); if(!data?.zzz||!data?.gfl2){ alert('Неверный формат'); return; } guidesData=data; await saveData(); renderCharacters(); alert('Импорт выполнен'); }catch(err){ console.error(err); alert('Ошибка импорта'); } }; r.readAsText(f); }
+
+		async function deleteCharacter(id){
+			if(!currentGame) return;
+			if(!confirm('Удалить персонажа?')) return;
+			const list = guidesData[currentGame].characters || [];
+			const idx = list.findIndex(x=>x.id===id);
+			if(idx>=0){ list.splice(idx,1); await saveData(); renderCharacters(); }
+		}
+
+		let viewingCharId = null;
+
+		function renderCharView(){
+			if(!currentGame || !viewingCharId) return;
+			const game=guidesData[currentGame];
+			const ch=(game.characters||[]).find(x=>x.id===viewingCharId); if(!ch) return;
+			const d = ch.detail || {};
+			const rankBg = ch.rank==='S' ? 'bg-orange' : 'bg-violet';
+			// resolve element/role icons from game settings
+			const elName = d.sidebar?.element || ch.element || '';
+			const roleName = d.sidebar?.role || ch.role || '';
+			const elIcon = (game.elements||[]).find(e=>e.name===elName)?.imageUrl || '';
+			const roleIcon = (game.roles||[]).find(r=>r.name===roleName)?.imageUrl || '';
+
+			if(currentGame === 'zzz') {
+				// ZZZ view
+				const amps = d.amplifiers || [];
+				const disks = d.driveDisks || [];
+				const traits = (d.traits)||[];
+				const tierClass = `tier-${ch.tier?.toLowerCase().replace('+', '-plus') || 's'}`;
+				const tierBadge = ch.tier ? `<div class="tier-badge ${tierClass}">${ch.tier}</div>` : '';
+				const noGuideBadge = !ch.hasGuide ? '<div class="no-guide-badge">Нет гайда</div>' : '';
+
+				const col1 = `
+					<div class='panel col-banbu'>
+						<div class='view-title'>Банбу</div>
+						${(d.bangbooList||[]).map(b=>`<div class='bb-item'><img src='${b.imageUrl||''}'><div class='bb-caption'>${b.name||''}</div></div>`).join('') || '<div class="small">Нет записей</div>'}
+					</div>`;
+
+				const col2 = `
+					<div class='panel col-teams'>
+						<div class='view-title'>Команды</div>
+						<div id='teamsPreview'></div>
+					</div>`;
+
+				const col3 = `
+					<div class='panel col-amps'>
+						<div class='view-title'>Амплификаторы</div>
+						${amps.map(a=>{
+							const isS = /5/.test(a.stars||'');
+							const starsClass = isS ? 's' : 'a';
+							const starCount = isS ? 5 : 4;
+							const starsHtml = `<span class='stars ${starsClass}'>${Array.from({length:starCount}).map(()=>'<i class="star"></i>').join('')}</span>`;
+							return `
+								<div class='amp-item'>
+									<div class='img-wrap ${isS?'rarity-s':'rarity-a'}'>
+										<img class='pic' src='${a.imageUrl||''}' alt='amp'>
+										<div class='caption'>${a.name||''}<br>${starsHtml}<br>${a.attack?`АТК: ${a.attack}`:''}<br>${a.summary||''}</div>
+									</div>
+									<div class='amp-desc'>${a.description||''}</div>
+								</div>`;
+						}).join('')}
+					</div>`;
+
+				const col4 = `
+					<div class='panel col-disks'>
+						<div class='view-title'>Драйв-диски</div>
+						${disks.map(dd=>`
+							<div class='disk-item'>
+								<div class='img-wrap'>
+									<img class='pic' src='${dd.imageUrl||''}' alt='disk'>
+									<div class='caption'>${dd.name||''}</div>
+								</div>
+								<div class='disk-columns'>
+									<div class='disk-text'>${dd.left||''}</div>
+									<div class='disk-text'>${dd.right||''}</div>
+								</div>
+							</div>
+						`).join('')}
+					</div>`;
+
+				const col5 = `
+					<div class='panel col-side'>
+						<div class='side-hero'>
+							<div class='bar ${ch.rank==='S'?'bar-s':'bar-a'}'></div>
+							${d.sidebar?.fullImageUrl?`<img class='hero-img' src='${d.sidebar.fullImageUrl}' alt='${ch.name}'>`:''}
+							${tierBadge}
+							${noGuideBadge}
+						</div>
+						<div class='side-box kv'><span style='font-size:14px;font-weight:800;'>${d.sidebar?.name||ch.name}</span>• <span class='${ch.rank==='S'?'badge-rank-s':'badge-rank-a'}'>${d.sidebar?.rank||ch.rank}</span> • <span class='inline-icons'>${elIcon?`<img src='${elIcon}'>`:''}${elName||'-'}</span> • <span class='inline-icons'>${roleIcon?`<img src='${roleIcon}'>`:''}${roleName||'-'}</span></div>
+						<div class='side-box'>
+							<div class='view-title' style='margin:0 0 6px 0;'>Задатки</div>
+							<div class='traits-box'>
+								${traits.map(t=>`<div class='row'>${t.imageUrl?`<img class='trait-icon' src='${t.imageUrl}'>`:''}<div>${t.name||''}</div></div>`).join('') || '<div class="small">Нет данных</div>'}
+							</div>
+						</div>
+						<div class='side-box'>
+							<div class='view-title' style='margin:0 0 6px 0;'>Рекомендуемые характеристики</div>
+							<div class='slots-box'>
+								<div class='slot-item'><div class='slot-name'>Слот 4</div><div class='slot-value'>${d.slots?.slot4||''}</div></div>
+								<div class='slot-item'><div class='slot-name'>Слот 5</div><div class='slot-value'>${d.slots?.slot5||''}</div></div>
+								<div class='slot-item'><div class='slot-name'>Слот 6</div><div class='slot-value'>${d.slots?.slot6||''}</div></div>
+								<div class='slot-item'><div class='slot-name'>Доп.</div><div class='slot-value'>${d.slots?.extra||''}</div></div>
+							</div>
+						</div>
+						<div class='side-box'>
+							<div class='view-title' style='margin:0 0 8px 0;'>Рекомендуемые значения</div>
+							<div class='recommend-text'>${d.recommended||''}</div>
+						</div>
+					</div>`;
+
+				document.getElementById('charView').innerHTML = col1+col2+col3+col4+col5;
+				document.getElementById('charView').className = 'view-wrap';
+				
+				// render teams preview for ZZZ
+				const teams = d.teams||[];
+				const lookup = id => (game.characters||[]).find(c=>c.id===id);
+				const previewHtml = teams.map(t=>{
+					const c2 = lookup(t.ally2Id);
+					const c3 = lookup(t.ally3Id);
+					return `
+						<div class='team-grid' style='margin-bottom:6px;'>
+							<div class='team-slot'><img class='slot-img ${rankBg}' src='${ch.imageUrl||''}' alt='${ch.name}'><div class='small'>${ch.name}</div></div>
+							<div class='team-slot'><img class='slot-img ${c2?.rank==='S'?'bg-orange':'bg-violet'}' src='${c2?.imageUrl||''}' alt='${c2?.name||''}'><div class='small'>${c2?.name||'-'}</div></div>
+							<div class='team-slot'><img class='slot-img ${c3?.rank==='S'?'bg-orange':'bg-violet'}' src='${c3?.imageUrl||''}' alt='${c3?.name||''}'><div class='small'>${c3?.name||'-'}</div></div>
+						</div>
+					`;
+				}).join('');
+				const tp=document.getElementById('teamsPreview'); if(tp) tp.innerHTML = previewHtml || '<div class="small">Команды не указаны.</div>';
+
+			} else if(currentGame === 'gfl2') {
+				// GFL2 view
+				const weapons = d.weapons || [];
+				const personalKeys = d.personalKeys || [];
+				const generalKeys = d.generalKeys || [];
+				const set = d.set || [];
+				const tierClass = `tier-${ch.tier?.toLowerCase().replace('+', '-plus') || 's'}`;
+				const tierBadge = ch.tier ? `<div class="tier-badge ${tierClass}">${ch.tier}</div>` : '';
+				const noGuideBadge = !ch.hasGuide ? '<div class="no-guide-badge">Нет гайда</div>' : '';
+
+				const col1 = `
+					<div class='panel col-teams'>
+						<div class='view-title'>Команды</div>
+						<div id='teamsPreview'></div>
+					</div>`;
+
+				const col2 = `
+					<div class='panel col-amps'>
+						<div class='view-title'>Оружие</div>
+						${weapons.map(w=>{
+							const isS = w.rarity === 'S';
+							return `
+								<div class='amp-item weapon-item'>
+									<div class='img-wrap weapon ${isS?'rarity-s':'rarity-a'}'>
+										<img class='pic' src='${w.imageUrl||''}' alt='weapon'>
+										<div class='caption'>${w.name||''}</div>
+									</div>
+								</div>`;
+						}).join('')}
+					</div>`;
+
+				const col3 = `
+					<div class='panel col-disks'>
+						<div class='view-title'>Личные ключи</div>
+						${personalKeys.map(k=>`
+							<div class='disk-item key'>
+								<div class='img-wrap key'>
+									<img class='pic' src='${k.imageUrl||'gfl2key.png'}' alt='key'>
+									<div class='caption key-caption'>${k.name||''}</div>
+								</div>
+							</div>
+						`).join('')}
+					</div>`;
+
+				const col4 = `
+					<div class='panel col-disks'>
+						<div class='view-title'>Общие ключи</div>
+						${generalKeys.map(k=>`
+							<div class='disk-item key'>
+								<div class='img-wrap key'>
+									<img class='pic' src='${k.imageUrl||'gfl2key.png'}' alt='key'>
+									<div class='caption key-caption'>${k.name||''}</div>
+								</div>
+							</div>
+						`).join('')}
+					</div>`;
+
+				const col5 = `
+					<div class='panel col-side'>
+						<div class='side-hero'>
+							<div class='bar ${ch.rank==='S'?'bar-s':'bar-a'}'></div>
+							${d.sidebar?.fullImageUrl?`<img class='hero-img' src='${d.sidebar.fullImageUrl}' alt='${ch.name}'>`:''}
+							${tierBadge}
+							${noGuideBadge}
+						</div>
+						<div class='side-box kv'><span style='font-size:14px;font-weight:800;'>${d.sidebar?.name||ch.name}</span>• <span class='${ch.rank==='S'?'badge-rank-s':'badge-rank-a'}'>${d.sidebar?.rank||ch.rank}</span> • <span class='inline-icons'>${elIcon?`<img src='${elIcon}'>`:''}${elName||'-'}</span> • <span class='inline-icons'>${roleIcon?`<img src='${roleIcon}'>`:''}${roleName||'-'}</span></div>
+						<div class='side-box'>
+							<div class='view-title' style='margin:0 0 6px 0;'>Сет</div>
+							<div class='traits-box'>
+								${set.map(s=>`<div class='row'>${s.imageUrl?`<img class='set-icon' src='${s.imageUrl}'>`:''}<div>${s.name||''}</div></div>`).join('') || '<div class="small">Нет данных</div>'}
+							</div>
+						</div>
+						<div class='side-box'>
+							<div class='view-title' style='margin:0 0 6px 0;'>Характеристики в обвесах</div>
+							<div class='recommend-text'>${d.characteristics||''}</div>
+						</div>
+						<div class='side-box'>
+							<div class='view-title' style='margin:0 0 8px 0;'>Итоговые характеристики</div>
+							<div class='recommend-text'>${d.finalStats||''}</div>
+						</div>
+					</div>`;
+
+				document.getElementById('charView').innerHTML = col1+col2+col3+col4+col5;
+				document.getElementById('charView').className = 'view-wrap gfl2-layout';
+				
+				// render teams preview for GFL2
+				const teams = d.teams||[];
+				const lookup = id => (game.characters||[]).find(c=>c.id===id);
+				const previewHtml = teams.map(t=>{
+					const members = t.members || [];
+					const memberChars = members.map(id => lookup(id)).filter(Boolean);
+					return `
+						<div class='team-grid' style='margin-bottom:6px; grid-template-columns: repeat(${Math.min(memberChars.length + 1, 5)}, 1fr);'>
+							<div class='team-slot'><img class='slot-img ${rankBg}' src='${ch.imageUrl||''}' alt='${ch.name}'><div class='small'>${ch.name}</div></div>
+							${memberChars.map(mc=>`<div class='team-slot'><img class='slot-img ${mc.rank==='S'?'bg-orange':'bg-violet'}' src='${mc.imageUrl||''}' alt='${mc.name||''}'><div class='small'>${mc.name||'-'}</div></div>`).join('')}
+						</div>
+					`;
+				}).join('');
+				const tp=document.getElementById('teamsPreview'); if(tp) tp.innerHTML = previewHtml || '<div class="small">Команды не указаны.</div>';
+			}
+		}
+
+		function openCharView(id){ viewingCharId=id; document.getElementById('charViewModal').style.display='flex'; renderCharView(); }
+		function closeCharView(){ document.getElementById('charViewModal').style.display='none'; const v=document.getElementById('charView'); if(v) v.className='view-wrap'; }
+		async function saveTeamSel(){
+			const game=guidesData[currentGame]; if(!game) return; const list=game.characters||[]; const ch=list.find(x=>x.id===viewingCharId); if(!ch) return;
+			ch.detail = ch.detail || {}; ch.detail.teams = ch.detail.teams || [{ally2Id:'',ally3Id:''}];
+			ch.detail.teams[0].ally2Id = document.getElementById('ally2Sel').value || '';
+			ch.detail.teams[0].ally3Id = document.getElementById('ally3Sel').value || '';
+			await saveData();
+		}
+
+		function openDetailEditor(){
+			const game=guidesData[currentGame]; const ch=(game.characters||[]).find(x=>x.id===viewingCharId); if(!ch) return;
+			document.getElementById('detailJson').value = JSON.stringify(ch.detail||{}, null, 2);
+			document.getElementById('detailEditor').style.display='flex';
+		}
+		function closeDetailEditor(){ document.getElementById('detailEditor').style.display='none'; }
+		async function saveDetailJson(){
+			try{
+				const game=guidesData[currentGame]; const ch=(game.characters||[]).find(x=>x.id===viewingCharId); if(!ch) return;
+				const obj=JSON.parse(document.getElementById('detailJson').value||'{}');
+				ch.detail=obj; await saveData(); closeDetailEditor(); renderCharView();
+			}catch(e){ alert('Ошибка JSON'); }
+		}
+
+		function styleRankSelect(sel){ sel.style.background = sel.value==='S' ? 'linear-gradient(45deg,#ff8c00,#a44b00)' : 'linear-gradient(45deg,#6e2bb1,#3d1f5d)'; }
+
+		function driveTpl(d,i){ return `
+			<div class='form-col' style='border:1px solid #333;border-radius:8px;padding:10px;margin-bottom:10px;'>
+				<div class='form-row'>
+					<div class='form-col'><label>Изображение</label><input class='input' id='d_img_${i}' value='${d.imageUrl||''}' placeholder='https://.../disk.png'></div>
+					<div class='form-col'><label>Название</label><input class='input' id='d_name_${i}' value='${d.name||''}' placeholder='Название'></div>
+				</div>
+				<div class='form-col'><label>Описание 1</label><textarea class='textarea' id='d_left_${i}'>${d.left||''}</textarea></div>
+				<div class='form-col'><label>Описание 2</label><textarea class='textarea' id='d_right_${i}'>${d.right||''}</textarea></div>
+				<div class='form-actions'><button class='btn secondary' onclick='removeDrive(${i})'>Удалить диск</button></div>
+			</div>`; }
+
+		function ampTpl(a,i){ return `
+			<div class='form-col' style='border:1px solid #333;border-radius:8px;padding:10px;margin-bottom:10px;'>
+				<div class='form-row'>
+					<div class='form-col'><label>Изображение</label><input class='input' id='a_img_${i}' value='${a.imageUrl||''}' placeholder='https://.../amp.png'></div>
+					<div class='form-col'><label>Название</label><input class='input' id='a_name_${i}' value='${a.name||''}' placeholder='Название'></div>
+				</div>
+				<div class='form-row'>
+					<div class='form-col'><label>Ранг (5*/4*)</label><input class='input' id='a_stars_${i}' value='${a.stars||''}' placeholder='5* или 4*'></div>
+					<div class='form-col'><label>Сила атаки</label><input class='input' id='a_atk_${i}' value='${a.attack||''}' placeholder='число/текст'></div>
+				</div>
+				<div class='form-col'><label>Характеристика</label><input class='input' id='a_summary_${i}' value='${a.summary||''}' placeholder='кратко'></div>
+				<div class='form-col'><label>Описание</label><textarea class='textarea' id='a_desc_${i}'>${a.description||''}</textarea></div>
+				<div class='form-actions'><button class='btn secondary' onclick='removeAmp(${i})'>Удалить амплификатор</button></div>
+			</div>`; }
+
+		function teamTpl(t,i,options){ return `
+			<div class='form-col' style='border:1px solid #333;border-radius:8px;padding:10px;margin-bottom:10px;'>
+				<div class='form-row'>
+					<div class='form-col'><label>Персонаж 1</label><select disabled class='select'><option>${document.getElementById('c_name').value||'Текущий'}</option></select></div>
+					<div class='form-col'><label>Персонаж 2</label><select id='t_${i}_a2' class='select'>${options}</select></div>
+					<div class='form-col'><label>Персонаж 3</label><select id='t_${i}_a3' class='select'>${options}</select></div>
+				</div>
+				<div class='form-actions'><button class='btn secondary' onclick='removeTeam(${i})'>Удалить команду</button></div>
+			</div>`; }
+
+		function renderDrives(d){ const box=document.getElementById('drivesBox'); box.innerHTML=d.map((x,i)=>driveTpl(x,i)).join(''); }
+		function renderAmps(a){ const box=document.getElementById('ampsBox'); box.innerHTML=a.map((x,i)=>ampTpl(x,i)).join(''); }
+		function renderTeams(t){
+			const game=guidesData[currentGame];
+			const options = (game.characters||[]).map(c=>`<option value='${c.id}'>${c.name}</option>`).join('');
+			document.getElementById('teamsBox').innerHTML = (t||[]).map((x,i)=>teamTpl(x,i,options)).join('');
+			(t||[]).forEach((x,i)=>{ const a2=document.getElementById(`t_${i}_a2`); const a3=document.getElementById(`t_${i}_a3`); if(a2) a2.value=x.ally2Id||''; if(a3) a3.value=x.ally3Id||''; });
+		}
+
+		function syncDrivesInputs(){ const list=_detail.drives||[]; list.forEach((d,i)=>{ const img=_g(`d_img_${i}`); const nm=_g(`d_name_${i}`); const l=_g(`d_left_${i}`); const r=_g(`d_right_${i}`); if(img) d.imageUrl=img.value; if(nm) d.name=nm.value; if(l) d.left=l.value; if(r) d.right=r.value; }); }
+		function syncAmpsInputs(){ const list=_detail.amps||[]; list.forEach((a,i)=>{ const img=_g(`a_img_${i}`); const nm=_g(`a_name_${i}`); const st=_g(`a_stars_${i}`); const atk=_g(`a_atk_${i}`); const sum=_g(`a_summary_${i}`); const desc=_g(`a_desc_${i}`); if(img) a.imageUrl=img.value; if(nm) a.name=nm.value; if(st) a.stars=st.value; if(atk) a.attack=atk.value; if(sum) a.summary=sum.value; if(desc) a.description=desc.value; }); }
+		function syncTeamsInputs(){ const list=_detail.teams||[]; list.forEach((t,i)=>{ const a2=_g(`t_${i}_a2`); const a3=_g(`t_${i}_a3`); if(a2) t.ally2Id=a2.value; if(a3) t.ally3Id=a3.value; }); }
+		function addDrive(){ syncDrivesInputs(); _detail.drives.push({imageUrl:'',name:'',left:'',right:''}); renderDrives(_detail.drives); }
+		function removeDrive(i){ syncDrivesInputs(); _detail.drives.splice(i,1); renderDrives(_detail.drives); }
+		function addAmp(){ syncAmpsInputs(); _detail.amps.push({imageUrl:'',name:'',stars:'',attack:'',summary:'',description:''}); renderAmps(_detail.amps); }
+		function removeAmp(i){ syncAmpsInputs(); _detail.amps.splice(i,1); renderAmps(_detail.amps); }
+		function addTeam(){ syncTeamsInputs(); _detail.teams.push({ally2Id:'',ally3Id:''}); renderTeams(_detail.teams); }
+		function removeTeam(i){ syncTeamsInputs(); _detail.teams.splice(i,1); renderTeams(_detail.teams); }
+
+		// Банбу (динамический список)
+		function bbTpl(b,i){ return `
+			<div class='form-col' style='border:1px solid #333;border-radius:8px;padding:10px;margin-bottom:10px;'>
+				<div class='form-row'>
+					<div class='form-col'><label>Изображение</label><input class='input' id='bb_img_${i}' value='${b.imageUrl||''}' placeholder='https://.../bangboo.png'></div>
+					<div class='form-col'><label>Название</label><input class='input' id='bb_name_${i}' value='${b.name||''}' placeholder='Название'></div>
+				</div>
+				<div class='form-actions'><button class='btn secondary' onclick='removeBangboo(${i})'>Удалить</button></div>
+			</div>`; }
+		function renderBangboo(list){ const box=document.getElementById('bangbooBox'); if(!box) return; box.innerHTML=(list||[]).map((b,i)=>bbTpl(b,i)).join(''); }
+		function syncBangbooInputs(){ const list=_detail.bangbooList||[]; list.forEach((b,i)=>{ const img=document.getElementById(`bb_img_${i}`); const nm=document.getElementById(`bb_name_${i}`); if(img) b.imageUrl=img.value; if(nm) b.name=nm.value; }); }
+		function addBangboo(){ syncBangbooInputs(); _detail.bangbooList.push({imageUrl:'', name:''}); renderBangboo(_detail.bangbooList); }
+		function removeBangboo(i){ _detail.bangbooList.splice(i,1); renderBangboo(_detail.bangbooList); }
+
+		let _detail={ drives:[], amps:[], teams:[], bangbooList:[], weapons:[], personalKeys:[], generalKeys:[] };
+
+		// GFL2 render functions
+		function weaponTpl(w,i){ return `
+			<div class='form-col' style='border:1px solid #333;border-radius:8px;padding:10px;margin-bottom:10px;'>
+				<div class='form-row'>
+					<div class='form-col'><label>Изображение</label><input class='input' id='w_img_${i}' value='${w.imageUrl||''}' placeholder='https://.../weapon.png'></div>
+					<div class='form-col'><label>Название</label><input class='input' id='w_name_${i}' value='${w.name||''}' placeholder='Название'></div>
+					<div class='form-col'><label>Редкость</label><select class='select' id='w_rarity_${i}'><option value='S' ${w.rarity==='S'?'selected':''}>S</option><option value='A' ${w.rarity==='A'?'selected':''}>A</option></select></div>
+				</div>
+				<div class='form-actions'><button class='btn secondary' onclick='removeWeapon(${i})'>Удалить оружие</button></div>
+			</div>`; }
+
+		function teamGFL2Tpl(t,i,options){ return `
+			<div class='form-col' style='border:1px solid #333;border-radius:8px;padding:10px;margin-bottom:10px;'>
+				<div class='form-row'>
+					<div class='form-col'><label>Персонаж 1</label><select disabled class='select'><option>${document.getElementById('c_name').value||'Текущий'}</option></select></div>
+					<div class='form-col'><label>Персонаж 2</label><select id='t_${i}_m2' class='select'>${options}</select></div>
+					<div class='form-col'><label>Персонаж 3</label><select id='t_${i}_m3' class='select'>${options}</select></div>
+					<div class='form-col'><label>Персонаж 4</label><select id='t_${i}_m4' class='select'>${options}</select></div>
+					<div class='form-col'><label>Персонаж 5</label><select id='t_${i}_m5' class='select'>${options}</select></div>
+				</div>
+				<div class='form-actions'><button class='btn secondary' onclick='removeTeamGFL2(${i})'>Удалить команду</button></div>
+			</div>`; }
+
+		function personalKeyTpl(k,i){ return `
+			<div class='form-col' style='border:1px solid #333;border-radius:8px;padding:10px;margin-bottom:10px;'>
+				<div class='form-row'>
+					<div class='form-col'><label>Изображение</label><input class='input' id='pk_img_${i}' value='${k.imageUrl||''}' placeholder='https://.../key.png'></div>
+					<div class='form-col'><label>Название</label><input class='input' id='pk_name_${i}' value='${k.name||''}' placeholder='Название'></div>
+				</div>
+			</div>`; }
+
+		function generalKeyTpl(k,i){ return `
+			<div class='form-col' style='border:1px solid #333;border-radius:8px;padding:10px;margin-bottom:10px;'>
+				<div class='form-row'>
+					<div class='form-col'><label>Изображение</label><input class='input' id='gk_img_${i}' value='${k.imageUrl||''}' placeholder='https://.../key.png'></div>
+					<div class='form-col'><label>Название</label><input class='input' id='gk_name_${i}' value='${k.name||''}' placeholder='Название'></div>
+				</div>
+				<div class='form-actions'><button class='btn secondary' onclick='removeGeneralKey(${i})'>Удалить ключ</button></div>
+			</div>`; }
+
+		function renderWeapons(w){ const box=document.getElementById('weaponsBox'); box.innerHTML=w.map((x,i)=>weaponTpl(x,i)).join(''); }
+		function renderTeamsGFL2(t){
+			const game=guidesData[currentGame];
+			const options = (game.characters||[]).map(c=>`<option value='${c.id}'>${c.name}</option>`).join('');
+			document.getElementById('teamsBoxGFL2').innerHTML = (t||[]).map((x,i)=>teamGFL2Tpl(x,i,options)).join('');
+			(t||[]).forEach((x,i)=>{ 
+				for(let j=2;j<=5;j++){ 
+					const sel=document.getElementById(`t_${i}_m${j}`); 
+					if(sel) sel.value=x.members?.[j-1]||''; 
+				} 
+			});
+		}
+		function renderPersonalKeys(k){ const box=document.getElementById('personalKeysBox'); box.innerHTML=k.map((x,i)=>personalKeyTpl(x,i)).join(''); }
+		function renderGeneralKeys(k){ const box=document.getElementById('generalKeysBox'); box.innerHTML=k.map((x,i)=>generalKeyTpl(x,i)).join(''); }
+
+		function addWeapon(){ _detail.weapons.push({imageUrl:'',name:'',rarity:'S'}); renderWeapons(_detail.weapons); }
+		function removeWeapon(i){ _detail.weapons.splice(i,1); renderWeapons(_detail.weapons); }
+		function addTeamGFL2(){ _detail.teams.push({members:['','','','','']}); renderTeamsGFL2(_detail.teams); }
+		function removeTeamGFL2(i){ _detail.teams.splice(i,1); renderTeamsGFL2(_detail.teams); }
+		function addGeneralKey(){ _detail.generalKeys.push({imageUrl:'',name:''}); renderGeneralKeys(_detail.generalKeys); }
+		function removeGeneralKey(i){ _detail.generalKeys.splice(i,1); renderGeneralKeys(_detail.generalKeys); }
+
+		const _g = s=>document.getElementById(s);
+	</script>
 </body>
 </html>
