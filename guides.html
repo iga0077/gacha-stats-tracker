@@ -589,6 +589,11 @@
 					console.error('Ошибка загрузки из localStorage:', e);
 				}
 			}
+			
+			// Автоматически выбираем ZZZ после загрузки данных
+			if (!currentGame) {
+				setGame('zzz');
+			}
 		}
 
 		// Сохранение данных в Firebase (только для админа)
@@ -695,8 +700,7 @@
 			}
 			const list = guidesData[currentGame]?.characters || [];
 			if(list.length===0){ 
-				const message = isAdminMode ? 'Нет персонажей. Нажмите "Добавить персонажа".' : 'Нет персонажей в базе данных.';
-				grid.innerHTML=`<div class="char-card"><div class="char-name">${message}</div></div>`; 
+				grid.innerHTML=''; 
 				return; 
 			}
 			
