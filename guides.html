@@ -589,6 +589,11 @@
 					console.error('Ошибка загрузки из localStorage:', e);
 				}
 			}
+			
+			// Принудительно обновляем отображение персонажей после загрузки данных
+			if (currentGame) {
+				renderCharacters();
+			}
 		}
 
 		// Сохранение данных в Firebase (только для админа)
@@ -646,7 +651,14 @@
 			}
 		});
 
-		function setGame(game){ currentGame=game; document.getElementById('currentGameBadge').textContent = 'Игра: ' + (game==='zzz'? 'Zenless Zone Zero' : "Girls' Frontline 2"); populateFilterOptions(); renderCharacters(); updateResetButton(); applyAdminMode(); }
+		function setGame(game){ 
+			currentGame=game; 
+			document.getElementById('currentGameBadge').textContent = 'Игра: ' + (game==='zzz'? 'Zenless Zone Zero' : "Girls' Frontline 2"); 
+			populateFilterOptions(); 
+			renderCharacters(); 
+			updateResetButton(); 
+			applyAdminMode(); 
+		}
 
 		function applyAdminMode(){
 			console.log('Применение админ режима:', isAdminMode);
@@ -697,6 +709,13 @@
 				grid.innerHTML='';
 				return; 
 			}
+			
+			// Проверяем, что данные загружены
+			if(!guidesData || !guidesData[currentGame]){
+				grid.innerHTML='';
+				return;
+			}
+			
 			const list = guidesData[currentGame]?.characters || [];
 			if(list.length===0){ 
 				grid.innerHTML=''; 
