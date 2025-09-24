@@ -1372,12 +1372,17 @@
 		function renderPersonalKeys(k){ const box=document.getElementById('personalKeysBox'); box.innerHTML=k.map((x,i)=>personalKeyTpl(x,i)).join(''); }
 		function renderGeneralKeys(k){ const box=document.getElementById('generalKeysBox'); box.innerHTML=k.map((x,i)=>generalKeyTpl(x,i)).join(''); }
 
-		function addWeapon(){ _detail.weapons.push({imageUrl:'',name:'',rarity:'S'}); renderWeapons(_detail.weapons); }
-		function removeWeapon(i){ _detail.weapons.splice(i,1); renderWeapons(_detail.weapons); }
-		function addTeamGFL2(){ _detail.teams.push({members:['','','','','']}); renderTeamsGFL2(_detail.teams); }
-		function removeTeamGFL2(i){ _detail.teams.splice(i,1); renderTeamsGFL2(_detail.teams); }
-		function addGeneralKey(){ _detail.generalKeys.push({imageUrl:'',name:''}); renderGeneralKeys(_detail.generalKeys); }
-		function removeGeneralKey(i){ _detail.generalKeys.splice(i,1); renderGeneralKeys(_detail.generalKeys); }
+		// GFL2 sync functions
+		function syncWeaponsInputs(){ const list=_detail.weapons||[]; list.forEach((w,i)=>{ const img=_g(`w_img_${i}`); const nm=_g(`w_name_${i}`); const rar=_g(`w_rarity_${i}`); if(img) w.imageUrl=img.value; if(nm) w.name=nm.value; if(rar) w.rarity=rar.value; }); }
+		function syncTeamsGFL2Inputs(){ const list=_detail.teams||[]; list.forEach((t,i)=>{ const m2=_g(`t_${i}_m2`); const m3=_g(`t_${i}_m3`); const m4=_g(`t_${i}_m4`); const m5=_g(`t_${i}_m5`); if(m2) t.members[1]=m2.value; if(m3) t.members[2]=m3.value; if(m4) t.members[3]=m4.value; if(m5) t.members[4]=m5.value; }); }
+		function syncGeneralKeysInputs(){ const list=_detail.generalKeys||[]; list.forEach((k,i)=>{ const img=_g(`gk_img_${i}`); const nm=_g(`gk_name_${i}`); if(img) k.imageUrl=img.value; if(nm) k.name=nm.value; }); }
+		
+		function addWeapon(){ syncWeaponsInputs(); _detail.weapons.push({imageUrl:'',name:'',rarity:'S'}); renderWeapons(_detail.weapons); }
+		function removeWeapon(i){ syncWeaponsInputs(); _detail.weapons.splice(i,1); renderWeapons(_detail.weapons); }
+		function addTeamGFL2(){ syncTeamsGFL2Inputs(); _detail.teams.push({members:['','','','','']}); renderTeamsGFL2(_detail.teams); }
+		function removeTeamGFL2(i){ syncTeamsGFL2Inputs(); _detail.teams.splice(i,1); renderTeamsGFL2(_detail.teams); }
+		function addGeneralKey(){ syncGeneralKeysInputs(); _detail.generalKeys.push({imageUrl:'',name:''}); renderGeneralKeys(_detail.generalKeys); }
+		function removeGeneralKey(i){ syncGeneralKeysInputs(); _detail.generalKeys.splice(i,1); renderGeneralKeys(_detail.generalKeys); }
 
 		const _g = s=>document.getElementById(s);
 	</script>
