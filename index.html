@@ -2431,6 +2431,25 @@
             return 1 / (1 + Math.exp(-a * x));
         }
         
+        // Функция для расчета математического ожидания крутков
+        function getExpectedPulls(guarantee, bannerType = 'event') {
+            // Практическая оценка: E[pulls] = guarantee * factor
+            // factor зависит от механики pity в игре
+            
+            let factor = 0.8; // Базовый фактор для большинства игр
+            
+            // Корректировка по типу баннера
+            if (bannerType === 'event') {
+                factor = 0.82; // Ивентовые баннеры обычно имеют мягкий pity
+            } else if (bannerType === 'weapon') {
+                factor = 0.78; // Оружейные баннеры могут иметь другую механику
+            } else if (bannerType === 'standard') {
+                factor = 0.85; // Стандартные баннеры часто без pity
+            }
+            
+            return Math.round(guarantee * factor);
+        }
+        
         function tanh(x) {
             return (Math.exp(x) - Math.exp(-x)) / (Math.exp(x) + Math.exp(-x));
         }
@@ -2464,7 +2483,7 @@
             let maxLossStreak = 0;
             
             // Параметры для расчета
-            const R0 = 1.0; // Ожидаемое соотношение к гаранту
+            const R0 = 1.0; // Ожидаемое соотношение к математическому ожиданию
             const sigma_R = 0.18; // Стандартное отклонение для R
             const k_early = 0.20; // Референтная вероятность раннего дропа
             const sigmoid_a = 0.7; // Крутизна сигмоиды
@@ -2489,7 +2508,10 @@
                 
                 if (bannerLegendaries > 0) {
                     const bannerAvg = bannerPulls / bannerLegendaries;
-                    const bannerR = bannerAvg / banner.guarantee;
+                    
+                    // Используем математическое ожидание вместо гаранта
+                    const expectedPulls = getExpectedPulls(banner.guarantee, banner.type);
+                    const bannerR = bannerAvg / expectedPulls;
                     
                     // Вес баннера
                     let bannerWeight = 0;
