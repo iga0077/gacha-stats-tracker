@@ -2338,13 +2338,24 @@
                 );
                 const avgLegendary = legendaryPulls > 0 ? (totalPulls / legendaryPulls).toFixed(1) : 0;
                 
-                // Ранние крутки (по формуле как в updateStats)
+                // Ранние крутки (по правильной формуле с фиксированными значениями)
                 let earlyPulls = 0;
                 let totalPullsForEarly = 0;
                 game.banners.forEach(banner => {
+                    let greenMax;
+                    if (banner.guarantee === 90) {
+                        greenMax = 39;
+                    } else if (banner.guarantee === 80) {
+                        greenMax = 29;
+                    } else if (banner.guarantee === 70) {
+                        greenMax = 19;
+                    } else {
+                        // Для пользовательских гарантов: используем пропорции от гаранта 90
+                        greenMax = Math.floor(banner.guarantee * 39 / 90);
+                    }
+                    
                     banner.pulls.forEach(pull => {
                         totalPullsForEarly++;
-                        const greenMax = Math.floor(banner.guarantee * 39 / 90);
                         if (pull.count <= greenMax) {
                             earlyPulls++;
                         }
@@ -2897,9 +2908,20 @@
                     totalLegendaries += bannerLegendaries;
                     
                     // Ранние дропы
+                    let greenMax;
+                    if (banner.guarantee === 90) {
+                        greenMax = 39;
+                    } else if (banner.guarantee === 80) {
+                        greenMax = 29;
+                    } else if (banner.guarantee === 70) {
+                        greenMax = 19;
+                    } else {
+                        // Для пользовательских гарантов: используем пропорции от гаранта 90
+                        greenMax = Math.floor(banner.guarantee * 39 / 90);
+                    }
+                    
                     banner.pulls.forEach(pull => {
                         totalEarlyPulls++;
-                        const greenMax = Math.floor(banner.guarantee * 39 / 90);
                         if (pull.count <= greenMax) {
                             earlyCount++;
                         }
@@ -3299,9 +3321,20 @@
             let earlyPulls = 0;
             let totalPullsForEarly = 0;
             game.banners.forEach(banner => {
+                let greenMax;
+                if (banner.guarantee === 90) {
+                    greenMax = 39;
+                } else if (banner.guarantee === 80) {
+                    greenMax = 29;
+                } else if (banner.guarantee === 70) {
+                    greenMax = 19;
+                } else {
+                    // Для пользовательских гарантов: используем пропорции от гаранта 90
+                    greenMax = Math.floor(banner.guarantee * 39 / 90);
+                }
+                
                 banner.pulls.forEach(pull => {
                     totalPullsForEarly++;
-                    const greenMax = Math.floor(banner.guarantee * 39 / 90);
                     if (pull.count <= greenMax) {
                         earlyPulls++;
                     }
@@ -3873,9 +3906,20 @@
 				let earlyPulls = 0;
 				let totalPullsForEarly = 0;
 				game.banners.forEach(banner => {
+					let greenMax;
+					if (banner.guarantee === 90) {
+						greenMax = 39;
+					} else if (banner.guarantee === 80) {
+						greenMax = 29;
+					} else if (banner.guarantee === 70) {
+						greenMax = 19;
+					} else {
+						// Для пользовательских гарантов: используем пропорции от гаранта 90
+						greenMax = Math.floor(banner.guarantee * 39 / 90);
+					}
+					
 					banner.pulls.forEach(pull => {
 						totalPullsForEarly++;
-						const greenMax = Math.floor(banner.guarantee * 39 / 90);
 						if (pull.count <= greenMax) {
 							earlyPulls++;
 						}
