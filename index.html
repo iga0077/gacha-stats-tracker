@@ -2769,8 +2769,11 @@
                 
                 // Считаем 50/50 (только для ивент и оружие баннеров)
                 if (banner.type === 'event' || banner.type === 'weapon') {
-                    trials50_50 += bannerLegendaries;
-                    wins50_50 += banner.pulls.filter(pull => pull.eventResult === 'win').length;
+                    // Считаем все леги с eventResult (W + G)
+                    const eventLegs = banner.pulls.filter(p => p.eventResult);
+                    trials50_50 += eventLegs.length;
+                    // Считаем только победы (W)
+                    wins50_50 += eventLegs.filter(pull => pull.eventResult === 'win').length;
                 }
             });
             
