@@ -443,8 +443,22 @@
             animation: rainbow 3s ease infinite;
         }
 
+        .luck-score.great .luck-score-circle {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad, #7d3c98);
+            background-size: 200% 200%;
+            animation: purple-glow 2s ease-in-out infinite alternate;
+        }
+
         .luck-score.excellent .luck-score-circle {
-            background: #27ae60;
+            background: linear-gradient(135deg, #27ae60, #2ecc71, #16a085);
+            background-size: 200% 200%;
+            animation: green-glow 2s ease-in-out infinite alternate;
+        }
+
+        .luck-score.very-good .luck-score-circle {
+            background: linear-gradient(135deg, #2ecc71, #58d68d, #27ae60);
+            background-size: 200% 200%;
+            animation: light-green-glow 2s ease-in-out infinite alternate;
         }
 
         .luck-score.good .luck-score-circle {
@@ -481,8 +495,31 @@
             animation: rainbow 3s ease infinite;
         }
 
+        .luck-score.great .luck-score-text {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad, #7d3c98);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: purple-glow 2s ease-in-out infinite alternate;
+        }
+
         .luck-score.excellent .luck-score-text {
-            color: #27ae60;
+            background: linear-gradient(135deg, #27ae60, #2ecc71, #16a085);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: green-glow 2s ease-in-out infinite alternate;
+        }
+
+        .luck-score.very-good .luck-score-text {
+            background: linear-gradient(135deg, #2ecc71, #58d68d, #27ae60);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: light-green-glow 2s ease-in-out infinite alternate;
         }
 
         .luck-score.good .luck-score-text {
@@ -621,11 +658,26 @@
             color: #ccc;
         }
 
-        /* Анимация для божественной удачи */
+        /* Анимации для уровней удачи */
         @keyframes rainbow {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
+        }
+
+        @keyframes purple-glow {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+
+        @keyframes green-glow {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+
+        @keyframes light-green-glow {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
         }
 
         .modal {
@@ -841,8 +893,22 @@
             animation: rainbow 3s ease infinite;
         }
 
+        .comparison-luck-score.great .comparison-luck-circle {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad, #7d3c98);
+            background-size: 200% 200%;
+            animation: purple-glow 2s ease-in-out infinite alternate;
+        }
+
         .comparison-luck-score.excellent .comparison-luck-circle {
-            background: #27ae60;
+            background: linear-gradient(135deg, #27ae60, #2ecc71, #16a085);
+            background-size: 200% 200%;
+            animation: green-glow 2s ease-in-out infinite alternate;
+        }
+
+        .comparison-luck-score.very-good .comparison-luck-circle {
+            background: linear-gradient(135deg, #2ecc71, #58d68d, #27ae60);
+            background-size: 200% 200%;
+            animation: light-green-glow 2s ease-in-out infinite alternate;
         }
 
         .comparison-luck-score.good .comparison-luck-circle {
@@ -879,8 +945,31 @@
             animation: rainbow 3s ease infinite;
         }
 
+        .comparison-luck-score.great .comparison-luck-text {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad, #7d3c98);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: purple-glow 2s ease-in-out infinite alternate;
+        }
+
         .comparison-luck-score.excellent .comparison-luck-text {
-            color: #27ae60;
+            background: linear-gradient(135deg, #27ae60, #2ecc71, #16a085);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: green-glow 2s ease-in-out infinite alternate;
+        }
+
+        .comparison-luck-score.very-good .comparison-luck-text {
+            background: linear-gradient(135deg, #2ecc71, #58d68d, #27ae60);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: light-green-glow 2s ease-in-out infinite alternate;
         }
 
         .comparison-luck-score.good .comparison-luck-text {
@@ -3010,7 +3099,9 @@
         // Функция для получения класса коэффициента удачи
         function getLuckClass(score) {
             if (score >= 90) return 'divine';
+            if (score >= 80) return 'great';
             if (score >= 75) return 'excellent';
+            if (score >= 70) return 'very-good';
             if (score >= 65) return 'good';
             if (score >= 60) return 'normal';
             if (score >= 50) return 'average';
@@ -3021,7 +3112,9 @@
         // Функция для получения текста коэффициента удачи
         function getLuckText(score) {
             if (score >= 90) return 'Божественная удача';
+            if (score >= 80) return 'Великая удача';
             if (score >= 75) return 'Отличная удача';
+            if (score >= 70) return 'Очень хорошая удача';
             if (score >= 65) return 'Хорошая удача';
             if (score >= 60) return 'Нормальная удача';
             if (score >= 50) return 'Средняя удача';
@@ -3818,7 +3911,9 @@
             // Функция для получения класса удачи
             function getLuckClass(score) {
                 if (score >= 90) return 'divine';
+                if (score >= 80) return 'great';
                 if (score >= 75) return 'excellent';
+                if (score >= 70) return 'very-good';
                 if (score >= 65) return 'good';
                 if (score >= 60) return 'normal';
                 if (score >= 50) return 'average';
@@ -3829,7 +3924,9 @@
             // Функция для получения текста удачи
             function getLuckText(score) {
                 if (score >= 90) return 'Божественная удача';
+                if (score >= 80) return 'Великая удача';
                 if (score >= 75) return 'Отличная удача';
+                if (score >= 70) return 'Очень хорошая удача';
                 if (score >= 65) return 'Хорошая удача';
                 if (score >= 60) return 'Нормальная удача';
                 if (score >= 50) return 'Средняя удача';
