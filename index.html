@@ -2927,13 +2927,13 @@
                         }
                     });
                     
-                    // 50/50 статистика
+                    // 50/50 статистика (правильная формула: победы(W) * 100 / ивент леги (W+G))
                     if (banner.type === 'event' || banner.type === 'weapon') {
-                        const relevantPulls = banner.pulls.filter(p => p.eventResult && p.eventResult !== 'guarantee');
-                        trials50_50 += relevantPulls.length;
-                        relevantPulls.forEach(pull => {
-                            if (pull.eventResult === 'win') wins50_50++;
-                        });
+                        // Считаем только W + G (победы + гаранты), исключая проигрыши (L)
+                        const eventLegs = banner.pulls.filter(p => p.eventResult === 'win' || p.eventResult === 'guarantee');
+                        trials50_50 += eventLegs.length;
+                        // Считаем только победы (W)
+                        wins50_50 += eventLegs.filter(pull => pull.eventResult === 'win').length;
                     }
                     
                     // Стрики
