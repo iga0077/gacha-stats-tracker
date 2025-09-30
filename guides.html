@@ -1061,10 +1061,12 @@
 									<img class='pic' src='${dd.imageUrl||''}' alt='disk'>
 									<div class='caption'>${dd.name||''}</div>
 								</div>
+								${(dd.left && dd.left.trim()) || (dd.right && dd.right.trim()) ? `
 								<div class='disk-columns'>
-									<div class='disk-text'>${dd.left||''}</div>
-									<div class='disk-text'>${dd.right||''}</div>
+									${dd.left && dd.left.trim() ? `<div class='disk-text'>${dd.left}</div>` : ''}
+									${dd.right && dd.right.trim() ? `<div class='disk-text'>${dd.right}</div>` : ''}
 								</div>
+								` : ''}
 							</div>
 						`).join('')}
 					</div>`;
