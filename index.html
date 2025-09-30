@@ -516,7 +516,7 @@
 
         .luck-tooltip {
             position: absolute;
-            bottom: 100%;
+            top: 100%;
             left: 50%;
             transform: translateX(-50%);
             background: rgba(0, 0, 0, 0.95);
@@ -535,16 +535,17 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
             max-width: 300px;
             white-space: normal;
+            margin-top: 8px;
         }
 
         .luck-tooltip::after {
             content: '';
             position: absolute;
-            top: 100%;
+            bottom: 100%;
             left: 50%;
             transform: translateX(-50%);
             border: 5px solid transparent;
-            border-top-color: rgba(0, 0, 0, 0.95);
+            border-bottom-color: rgba(0, 0, 0, 0.95);
         }
 
         .luck-score:hover .luck-tooltip {
@@ -2573,15 +2574,15 @@
                     if (banner.type === 'event') {
                         totalEventPulls += bannerPulls;
                         totalEventLegendaries += bannerLegendaries;
-                        eventStats = `Ивент: ${bannerAvg.toFixed(1)}/${expectedPulls} крутков`;
+                        eventStats = `Ивент: ${bannerAvg.toFixed(1)}/${expectedPulls} круток`;
                     } else if (banner.type === 'weapon') {
                         totalWeaponPulls += bannerPulls;
                         totalWeaponLegendaries += bannerLegendaries;
-                        weaponStats = `Оружие: ${bannerAvg.toFixed(1)}/${expectedPulls} крутков`;
+                        weaponStats = `Оружие: ${bannerAvg.toFixed(1)}/${expectedPulls} круток`;
                     } else if (banner.type === 'standard') {
                         totalStandardPulls += bannerPulls;
                         totalStandardLegendaries += bannerLegendaries;
-                        standardStats = `Стандарт: ${bannerAvg.toFixed(1)}/${expectedPulls} крутков`;
+                        standardStats = `Стандарт: ${bannerAvg.toFixed(1)}/${expectedPulls} круток`;
                     }
                 }
             });
@@ -2613,11 +2614,6 @@
                     ${eventStats ? `<div class="tooltip-section"><div class="tooltip-label">${eventStats}</div></div>` : ''}
                     ${weaponStats ? `<div class="tooltip-section"><div class="tooltip-label">${weaponStats}</div></div>` : ''}
                     ${standardStats ? `<div class="tooltip-section"><div class="tooltip-label">${standardStats}</div></div>` : ''}
-                    
-                    <div class="tooltip-section">
-                        <div class="tooltip-label">Методология:</div>
-                        <div class="tooltip-value">Z-score + сигмоидная нормализация</div>
-                    </div>
                 </div>
             `;
         }
