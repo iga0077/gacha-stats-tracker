@@ -2587,6 +2587,13 @@
                 }
             });
 
+            // Рассчитываем вклад каждого компонента в итоговый скор
+            const avgPullsContribution = Math.round(components.avgPulls * 0.4);
+            const earlyContribution = Math.round(components.early * 0.15);
+            const win50Contribution = Math.round(components.win50_50 * 0.35);
+            const streaksContribution = Math.round(components.streaks * 0.10);
+            const totalContribution = avgPullsContribution + earlyContribution + win50Contribution + streaksContribution;
+
             return `
                 <div class="luck-tooltip">
                     <div class="tooltip-title">Расчет коэффициента удачи</div>
@@ -2602,13 +2609,23 @@
                     </div>
                     
                     <div class="tooltip-section">
-                        <div class="tooltip-label">Компоненты:</div>
+                        <div class="tooltip-label">Формула расчета:</div>
+                        <div class="tooltip-value">40% × ${components.avgPulls} + 15% × ${components.early} + 35% × ${components.win50_50} + 10% × ${components.streaks}</div>
+                    </div>
+                    
+                    <div class="tooltip-section">
+                        <div class="tooltip-label">Вклад компонентов:</div>
                         <div class="tooltip-components">
-                            <div class="tooltip-component">Средние крутки: ${components.avgPulls}</div>
-                            <div class="tooltip-component">Ранние дропы: ${components.early}</div>
-                            <div class="tooltip-component">50/50: ${components.win50_50}</div>
-                            <div class="tooltip-component">Стрики: ${components.streaks}</div>
+                            <div class="tooltip-component">Средние крутки: ${avgPullsContribution} (40%)</div>
+                            <div class="tooltip-component">Ранние дропы: ${earlyContribution} (15%)</div>
+                            <div class="tooltip-component">50/50: ${win50Contribution} (35%)</div>
+                            <div class="tooltip-component">Стрики: ${streaksContribution} (10%)</div>
                         </div>
+                    </div>
+                    
+                    <div class="tooltip-section">
+                        <div class="tooltip-label">Проверка:</div>
+                        <div class="tooltip-value">${avgPullsContribution} + ${earlyContribution} + ${win50Contribution} + ${streaksContribution} = ${totalContribution}</div>
                     </div>
                     
                     ${eventStats ? `<div class="tooltip-section"><div class="tooltip-label">${eventStats}</div></div>` : ''}
