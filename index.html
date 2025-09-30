@@ -589,19 +589,20 @@
             transform: translateX(-50%);
             background: rgba(0, 0, 0, 0.95);
             color: white;
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 12px;
-            line-height: 1.4;
+            padding: 20px;
+            border-radius: 12px;
+            font-size: 14px;
+            line-height: 1.6;
             white-space: nowrap;
             z-index: 1000;
             opacity: 0;
             visibility: hidden;
             transition: opacity 0.3s, visibility 0.3s;
             pointer-events: none;
-            border: 1px solid #333;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            max-width: 300px;
+            border: 1px solid #555;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            max-width: 600px;
+            min-width: 500px;
             white-space: normal;
             margin-top: 8px;
         }
@@ -656,6 +657,24 @@
         .tooltip-component {
             font-size: 10px;
             color: #ccc;
+        }
+
+        .tooltip-level {
+            text-align: center;
+            margin: 8px 0;
+            padding: 8px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .tooltip-simple {
+            margin-top: 8px;
+            line-height: 1.6;
+        }
+
+        .tooltip-simple div {
+            margin: 4px 0;
+            padding: 2px 0;
         }
 
         /* Анимации для уровней удачи */
@@ -2714,81 +2733,88 @@
                 return '<div class="luck-tooltip"><div class="tooltip-title">Недостаточно данных</div></div>';
             }
 
-            const { score, confidence, uncertainty, components, zScores } = luckData;
+            const { score, confidence, uncertainty, components } = luckData;
             
-            // Собираем статистику по баннерам для подсказки
-            let eventStats = '', weaponStats = '', standardStats = '';
-            let totalEventPulls = 0, totalWeaponPulls = 0, totalStandardPulls = 0;
-            let totalEventLegendaries = 0, totalWeaponLegendaries = 0, totalStandardLegendaries = 0;
+            // Собираем простую статистику
+            let totalLegendaries = 0;
+            let totalPulls = 0;
+            let earlyDrops = 0;
+            let wins50_50 = 0;
+            let trials50_50 = 0;
             
             game.banners.forEach(banner => {
                 const bannerPulls = banner.pulls.reduce((sum, pull) => sum + pull.count, 0);
                 const bannerLegendaries = banner.pulls.length;
+                totalLegendaries += bannerLegendaries;
+                totalPulls += bannerPulls;
                 
-                if (bannerLegendaries > 0) {
-                    const bannerAvg = bannerPulls / bannerLegendaries;
-                    const expectedPulls = getExpectedPulls(banner.guarantee, banner.type);
-                    
-                    if (banner.type === 'event') {
-                        totalEventPulls += bannerPulls;
-                        totalEventLegendaries += bannerLegendaries;
-                        eventStats = `Ивент: ${bannerAvg.toFixed(1)}/${expectedPulls} круток`;
-                    } else if (banner.type === 'weapon') {
-                        totalWeaponPulls += bannerPulls;
-                        totalWeaponLegendaries += bannerLegendaries;
-                        weaponStats = `Оружие: ${bannerAvg.toFixed(1)}/${expectedPulls} круток`;
-                    } else if (banner.type === 'standard') {
-                        totalStandardPulls += bannerPulls;
-                        totalStandardLegendaries += bannerLegendaries;
-                        standardStats = `Стандарт: ${bannerAvg.toFixed(1)}/${expectedPulls} круток`;
-                    }
+                // Считаем ранние дропы (до 50 круток)
+                banner.pulls.forEach(pull => {
+                    if (pull.count <= 50) earlyDrops++;
+                });
+                
+                // Считаем 50/50
+                if (banner.type === 'event' || banner.type === 'weapon') {
+                    trials50_50 += bannerLegendaries;
+                    wins50_50 += banner.pulls.filter(pull => pull.won50_50).length;
                 }
             });
-
-            // Рассчитываем вклад каждого компонента в итоговый скор
-            const avgPullsContribution = Math.round(components.avgPulls * 0.4);
-            const earlyContribution = Math.round(components.early * 0.15);
-            const win50Contribution = Math.round(components.win50_50 * 0.35);
-            const streaksContribution = Math.round(components.streaks * 0.10);
-            const totalContribution = avgPullsContribution + earlyContribution + win50Contribution + streaksContribution;
+            
+            const avgPulls = totalLegendaries > 0 ? (totalPulls / totalLegendaries).toFixed(1) : '0';
+            const earlyRate = totalLegendaries > 0 ? ((earlyDrops / totalLegendaries) * 100).toFixed(1) : '0';
+            const winRate = trials50_50 > 0 ? ((wins50_50 / trials50_50) * 100).toFixed(1) : '0';
+            
+            // Определяем уровень удачи
+            let luckLevel = '';
+            let luckColor = '';
+            if (score >= 90) { luckLevel = 'Божественная удача'; luckColor = '#ff6b6b'; }
+            else if (score >= 80) { luckLevel = 'Великая удача'; luckColor = '#9b59b6'; }
+            else if (score >= 75) { luckLevel = 'Отличная удача'; luckColor = '#27ae60'; }
+            else if (score >= 70) { luckLevel = 'Очень хорошая удача'; luckColor = '#2ecc71'; }
+            else if (score >= 65) { luckLevel = 'Хорошая удача'; luckColor = '#2ecc71'; }
+            else if (score >= 60) { luckLevel = 'Нормальная удача'; luckColor = '#3498db'; }
+            else if (score >= 50) { luckLevel = 'Средняя удача'; luckColor = '#f39c12'; }
+            else if (score >= 40) { luckLevel = 'Плохая удача'; luckColor = '#e74c3c'; }
+            else { luckLevel = 'Очень плохая удача'; luckColor = '#8b0000'; }
 
             return `
                 <div class="luck-tooltip">
-                    <div class="tooltip-title">Расчет коэффициента удачи</div>
+                    <div class="tooltip-title">🎯 Ваша удача: ${score} баллов</div>
                     
                     <div class="tooltip-section">
-                        <div class="tooltip-label">Итоговый скор:</div>
-                        <div class="tooltip-value">${score} баллов</div>
-                    </div>
-                    
-                    <div class="tooltip-section">
-                        <div class="tooltip-label">Надежность:</div>
-                        <div class="tooltip-value">${confidence}% ${uncertainty > 0 ? `(±${uncertainty})` : ''}</div>
-                    </div>
-                    
-                    <div class="tooltip-section">
-                        <div class="tooltip-label">Формула расчета:</div>
-                        <div class="tooltip-value">40% × ${components.avgPulls} + 15% × ${components.early} + 35% × ${components.win50_50} + 10% × ${components.streaks}</div>
-                    </div>
-                    
-                    <div class="tooltip-section">
-                        <div class="tooltip-label">Вклад компонентов:</div>
-                        <div class="tooltip-components">
-                            <div class="tooltip-component">Средние крутки: ${avgPullsContribution} (40%)</div>
-                            <div class="tooltip-component">Ранние дропы: ${earlyContribution} (15%)</div>
-                            <div class="tooltip-component">50/50: ${win50Contribution} (35%)</div>
-                            <div class="tooltip-component">Стрики: ${streaksContribution} (10%)</div>
+                        <div class="tooltip-level" style="color: ${luckColor}; font-weight: bold; font-size: 16px;">
+                            ${luckLevel}
                         </div>
                     </div>
                     
                     <div class="tooltip-section">
-                        <div class="tooltip-label">Проверка:</div>
-                        <div class="tooltip-value">${avgPullsContribution} + ${earlyContribution} + ${win50Contribution} + ${streaksContribution} = ${totalContribution}</div>
+                        <div class="tooltip-label">📊 Ваши результаты:</div>
+                        <div class="tooltip-simple">
+                            <div>• Среднее круток на легендарку: <strong>${avgPulls}</strong> (норма: ~75)</div>
+                            <div>• Ранние дропы: <strong>${earlyRate}%</strong> (норма: ~20%)</div>
+                            <div>• Победы в 50/50: <strong>${winRate}%</strong> (норма: 50%)</div>
+                            <div>• Всего легендарок: <strong>${totalLegendaries}</strong></div>
+                        </div>
                     </div>
                     
-                    ${eventStats ? `<div class="tooltip-section"><div class="tooltip-label">${eventStats}</div></div>` : ''}
-                    ${weaponStats ? `<div class="tooltip-section"><div class="tooltip-label">${weaponStats}</div></div>` : ''}
-                    ${standardStats ? `<div class="tooltip-section"><div class="tooltip-label">${standardStats}</div></div>` : ''}
+                    <div class="tooltip-section">
+                        <div class="tooltip-label">🎲 Как это считается:</div>
+                        <div class="tooltip-simple">
+                            <div>• Если получаешь легендарки быстрее обычного = +баллы</div>
+                            <div>• Если много ранних дропов = +баллы</div>
+                            <div>• Если часто выигрываешь 50/50 = +баллы</div>
+                            <div>• Если есть длинные серии побед = +баллы</div>
+                        </div>
+                    </div>
+                    
+                    <div class="tooltip-section">
+                        <div class="tooltip-label">📈 Надежность оценки:</div>
+                        <div class="tooltip-simple">
+                            <div>• Чем больше данных, тем точнее оценка</div>
+                            <div>• Сейчас: <strong>${confidence}%</strong> уверенности</div>
+                            ${uncertainty > 0 ? `<div>• Возможная погрешность: ±${uncertainty} баллов</div>` : ''}
+                        </div>
+                    </div>
                 </div>
             `;
         }
