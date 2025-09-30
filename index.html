@@ -2738,7 +2738,7 @@
             // Собираем простую статистику
             let totalLegendaries = 0;
             let totalPulls = 0;
-            let earlyDrops = 0;
+            let earlyLegs = 0;
             let wins50_50 = 0;
             let trials50_50 = 0;
             
@@ -2748,20 +2748,21 @@
                 totalLegendaries += bannerLegendaries;
                 totalPulls += bannerPulls;
                 
-                // Считаем ранние дропы (до 50 круток)
+                // Считаем ранние леги (по той же логике, что и в статистике)
+                const greenMax = Math.floor(banner.guarantee * 39 / 90);
                 banner.pulls.forEach(pull => {
-                    if (pull.count <= 50) earlyDrops++;
+                    if (pull.count <= greenMax) earlyLegs++;
                 });
                 
-                // Считаем 50/50
+                // Считаем 50/50 (только для ивент и оружие баннеров)
                 if (banner.type === 'event' || banner.type === 'weapon') {
                     trials50_50 += bannerLegendaries;
-                    wins50_50 += banner.pulls.filter(pull => pull.won50_50).length;
+                    wins50_50 += banner.pulls.filter(pull => pull.eventResult === 'win').length;
                 }
             });
             
             const avgPulls = totalLegendaries > 0 ? (totalPulls / totalLegendaries).toFixed(1) : '0';
-            const earlyRate = totalLegendaries > 0 ? ((earlyDrops / totalLegendaries) * 100).toFixed(1) : '0';
+            const earlyRate = totalLegendaries > 0 ? ((earlyLegs / totalLegendaries) * 100).toFixed(1) : '0';
             const winRate = trials50_50 > 0 ? ((wins50_50 / trials50_50) * 100).toFixed(1) : '0';
             
             // Определяем уровень удачи
@@ -2791,7 +2792,7 @@
                         <div class="tooltip-label">📊 Ваши результаты:</div>
                         <div class="tooltip-simple">
                             <div>• Среднее круток на легендарку: <strong>${avgPulls}</strong> (норма: ~75)</div>
-                            <div>• Ранние дропы: <strong>${earlyRate}%</strong> (норма: ~20%)</div>
+                            <div>• Ранние леги: <strong>${earlyRate}%</strong> (норма: ~20%)</div>
                             <div>• Победы в 50/50: <strong>${winRate}%</strong> (норма: 50%)</div>
                             <div>• Всего легендарок: <strong>${totalLegendaries}</strong></div>
                         </div>
@@ -2801,7 +2802,7 @@
                         <div class="tooltip-label">🎲 Как это считается:</div>
                         <div class="tooltip-simple">
                             <div>• Если получаешь легендарки быстрее обычного = +баллы</div>
-                            <div>• Если много ранних дропов = +баллы</div>
+                            <div>• Если много ранних легов (зеленые в статистике) = +баллы</div>
                             <div>• Если часто выигрываешь 50/50 = +баллы</div>
                             <div>• Если есть длинные серии побед = +баллы</div>
                         </div>
