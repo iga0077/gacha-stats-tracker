@@ -2362,9 +2362,10 @@
                 let eventWinRate = 0;
                 let eventStreaks = { maxWinStreak: 0, maxLoseStreak: 0 };
                 if (eventBanner) {
-                    const eventPulls = eventBanner.pulls.filter(p => p.eventResult && p.eventResult !== 'guarantee');
-                    const wins = eventPulls.filter(p => p.eventResult === 'win').length;
-                    eventWinRate = eventPulls.length > 0 ? (wins / eventPulls.length * 100).toFixed(1) : '0.0';
+                    // Правильная формула: победы(W) * 100 / ивент леги (W+G)
+                    const eventLegs = eventBanner.pulls.filter(p => p.eventResult === 'win' || p.eventResult === 'guarantee');
+                    const wins = eventLegs.filter(p => p.eventResult === 'win').length;
+                    eventWinRate = eventLegs.length > 0 ? (wins / eventLegs.length * 100).toFixed(1) : '0.0';
                     eventStreaks = calculateStreaks(eventBanner.pulls);
                 }
 
@@ -2372,9 +2373,10 @@
                 const weaponBanner = game.banners.find(b => b.type === 'weapon');
                 let weaponWinRate = 0;
                 if (weaponBanner) {
-                    const weaponPulls = weaponBanner.pulls.filter(p => p.eventResult && p.eventResult !== 'guarantee');
-                    const wins = weaponPulls.filter(p => p.eventResult === 'win').length;
-                    weaponWinRate = weaponPulls.length > 0 ? (wins / weaponPulls.length * 100).toFixed(1) : '0.0';
+                    // Правильная формула: победы(W) * 100 / оружейные леги (W+G)
+                    const weaponLegs = weaponBanner.pulls.filter(p => p.eventResult === 'win' || p.eventResult === 'guarantee');
+                    const wins = weaponLegs.filter(p => p.eventResult === 'win').length;
+                    weaponWinRate = weaponLegs.length > 0 ? (wins / weaponLegs.length * 100).toFixed(1) : '0.0';
                 }
                 
                 // Коэффициент удачи (статистическая версия)
@@ -3270,9 +3272,10 @@
             let eventWinRate = 0;
             let eventStreaks = { maxWinStreak: 0, maxLoseStreak: 0 };
             if (eventBanner) {
-                const eventPulls = eventBanner.pulls.filter(p => p.eventResult && p.eventResult !== 'guarantee');
-                const wins = eventPulls.filter(p => p.eventResult === 'win').length;
-                eventWinRate = eventPulls.length > 0 ? (wins * 100 / eventPulls.length).toFixed(1) : 0;
+                // Правильная формула: победы(W) * 100 / ивент леги (W+G)
+                const eventLegs = eventBanner.pulls.filter(p => p.eventResult === 'win' || p.eventResult === 'guarantee');
+                const wins = eventLegs.filter(p => p.eventResult === 'win').length;
+                eventWinRate = eventLegs.length > 0 ? (wins * 100 / eventLegs.length).toFixed(1) : 0;
                 eventStreaks = calculateStreaks(eventBanner.pulls);
             }
 
@@ -3280,9 +3283,10 @@
             const weaponBanner = game.banners.find(b => b.type === 'weapon');
             let weaponWinRate = 0;
             if (weaponBanner) {
-                const weaponPulls = weaponBanner.pulls.filter(p => p.eventResult && p.eventResult !== 'guarantee');
-                const wins = weaponPulls.filter(p => p.eventResult === 'win').length;
-                weaponWinRate = weaponPulls.length > 0 ? (wins * 100 / weaponPulls.length).toFixed(1) : 0;
+                // Правильная формула: победы(W) * 100 / оружейные леги (W+G)
+                const weaponLegs = weaponBanner.pulls.filter(p => p.eventResult === 'win' || p.eventResult === 'guarantee');
+                const wins = weaponLegs.filter(p => p.eventResult === 'win').length;
+                weaponWinRate = weaponLegs.length > 0 ? (wins * 100 / weaponLegs.length).toFixed(1) : 0;
             }
 
             // Рассчитываем коэффициент удачи (статистическая версия)
@@ -3848,9 +3852,10 @@
                 let eventWinRate = 0;
                 let eventStreaks = { maxWinStreak: 0, maxLoseStreak: 0 };
                 if (eventBanner) {
-                    const eventPulls = eventBanner.pulls.filter(p => p.eventResult && p.eventResult !== 'guarantee');
-                    const wins = eventPulls.filter(p => p.eventResult === 'win').length;
-                    eventWinRate = eventPulls.length > 0 ? wins / eventPulls.length * 100 : 0;
+                    // Правильная формула: победы(W) * 100 / ивент леги (W+G)
+                    const eventLegs = eventBanner.pulls.filter(p => p.eventResult === 'win' || p.eventResult === 'guarantee');
+                    const wins = eventLegs.filter(p => p.eventResult === 'win').length;
+                    eventWinRate = eventLegs.length > 0 ? wins / eventLegs.length * 100 : 0;
                     eventStreaks = calculateStreaks(eventBanner.pulls);
                 }
 
@@ -3858,9 +3863,10 @@
 				const weaponBanner = game.banners.find(b => b.type === 'weapon');
 				let weaponWinRate = 0;
 				if (weaponBanner) {
-					const weaponPulls = weaponBanner.pulls.filter(p => p.eventResult && p.eventResult !== 'guarantee');
-					const wins = weaponPulls.filter(p => p.eventResult === 'win').length;
-					weaponWinRate = weaponPulls.length > 0 ? wins / weaponPulls.length * 100 : 0;
+					// Правильная формула: победы(W) * 100 / оружейные леги (W+G)
+					const weaponLegs = weaponBanner.pulls.filter(p => p.eventResult === 'win' || p.eventResult === 'guarantee');
+					const wins = weaponLegs.filter(p => p.eventResult === 'win').length;
+					weaponWinRate = weaponLegs.length > 0 ? wins / weaponLegs.length * 100 : 0;
 				}
 
 				// Рассчитываем процент ранних легендарок
