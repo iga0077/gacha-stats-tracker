@@ -2750,7 +2750,18 @@
                 totalPulls += bannerPulls;
                 
                 // Считаем ранние пулы (по той же логике, что и в статистике)
-                const greenMax = Math.floor(banner.guarantee * 39 / 90);
+                let greenMax;
+                if (banner.guarantee === 90) {
+                    greenMax = 39;
+                } else if (banner.guarantee === 80) {
+                    greenMax = 29;
+                } else if (banner.guarantee === 70) {
+                    greenMax = 19;
+                } else {
+                    // Для пользовательских гарантов: используем пропорции от гаранта 90
+                    greenMax = Math.floor(banner.guarantee * 39 / 90);
+                }
+                
                 banner.pulls.forEach(pull => {
                     totalPullsForEarly++;
                     if (pull.count <= greenMax) earlyPulls++;
