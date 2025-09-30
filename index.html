@@ -508,6 +508,87 @@
             text-align: center;
         }
 
+        /* Tooltip для коэффициента удачи */
+        .luck-score {
+            position: relative;
+            cursor: help;
+        }
+
+        .luck-tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.95);
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            line-height: 1.4;
+            white-space: nowrap;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+            pointer-events: none;
+            border: 1px solid #333;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            max-width: 300px;
+            white-space: normal;
+        }
+
+        .luck-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-top-color: rgba(0, 0, 0, 0.95);
+        }
+
+        .luck-score:hover .luck-tooltip {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .tooltip-title {
+            font-weight: bold;
+            color: #4a90e2;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+
+        .tooltip-section {
+            margin-bottom: 6px;
+        }
+
+        .tooltip-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .tooltip-label {
+            color: #b0b0b0;
+            font-size: 11px;
+        }
+
+        .tooltip-value {
+            color: white;
+            font-weight: bold;
+        }
+
+        .tooltip-components {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4px;
+            margin-top: 4px;
+        }
+
+        .tooltip-component {
+            font-size: 10px;
+            color: #ccc;
+        }
+
         .modal {
             display: none;
             position: fixed;
@@ -1484,8 +1565,8 @@
                 <button id="guideBtn" class="guide-btn" title="Гайды" onclick="window.location.href='guides.html'"><img src="guide.png" alt="Guides"></button>
                 <span class="icon-separator"></span>
                 <button id="globalStatsBtn" class="global-stats-btn" title="Глобальная статистика" onclick="toggleGlobalStats()"><img id="globalStatsIcon" src="all_users.png" alt="Global"></button>
-                <img id="userAvatar" class="user-avatar" src="" alt="Avatar">
-                <span id="userName" class="user-name"></span>
+                    <img id="userAvatar" class="user-avatar" src="" alt="Avatar">
+                    <span id="userName" class="user-name"></span>
                 <button class="signout-btn" onclick="signOut()">Выйти</button>
         </div>
     </div>
@@ -1999,7 +2080,7 @@
         function showUserStats(user) {
             const container = document.getElementById('statsContainer');
             container.className = 'stats-container';
-
+            
             // Показать контейнер контролов и подготовить локальный селектор
             const headerControls = document.querySelector('.header-controls');
             if (headerControls) headerControls.style.display = 'flex';
@@ -2016,7 +2097,7 @@
                     </div>
                 </div>
             `;
-
+            
             // Удаляем предыдущую вставку, если была
             const prev = document.querySelector('.selected-user-info');
             if (prev) prev.remove();
@@ -2108,7 +2189,7 @@
                     eventWinRate = eventPulls.length > 0 ? (wins / eventPulls.length * 100).toFixed(1) : '0.0';
                     eventStreaks = calculateStreaks(eventBanner.pulls);
                 }
-                
+
                 // Статистика оружейного баннера
                 const weaponBanner = game.banners.find(b => b.type === 'weapon');
                 let weaponWinRate = 0;
@@ -2251,14 +2332,14 @@
                 });
                 headerControls.style.display = 'flex';
             }
-
+            
             // Удаляем информацию о выбранном пользователе
             const selectedUserInfo = document.querySelector('.selected-user-info');
             if (selectedUserInfo) selectedUserInfo.remove();
-
+            
             // Обнуляем состояние выбранного пользователя
             selectedUserGameId = null;
-
+            
             // Обновляем селекторы игр и статистику
             updateGameSelectors();
             updateStats();
@@ -2468,7 +2549,82 @@
             };
         }
 
+        // Функция для генерации HTML подсказки коэффициента удачи
+        function generateLuckTooltip(luckData, game) {
+            if (!luckData || !luckData.components) {
+                return '<div class="luck-tooltip"><div class="tooltip-title">Недостаточно данных</div></div>';
+            }
+
+            const { score, confidence, uncertainty, components, zScores } = luckData;
+            
+            // Собираем статистику по баннерам для подсказки
+            let eventStats = '', weaponStats = '', standardStats = '';
+            let totalEventPulls = 0, totalWeaponPulls = 0, totalStandardPulls = 0;
+            let totalEventLegendaries = 0, totalWeaponLegendaries = 0, totalStandardLegendaries = 0;
+            
+            game.banners.forEach(banner => {
+                const bannerPulls = banner.pulls.reduce((sum, pull) => sum + pull.count, 0);
+                const bannerLegendaries = banner.pulls.length;
+                
+                if (bannerLegendaries > 0) {
+                    const bannerAvg = bannerPulls / bannerLegendaries;
+                    const expectedPulls = getExpectedPulls(banner.guarantee, banner.type);
+                    
+                    if (banner.type === 'event') {
+                        totalEventPulls += bannerPulls;
+                        totalEventLegendaries += bannerLegendaries;
+                        eventStats = `Ивент: ${bannerAvg.toFixed(1)}/${expectedPulls} крутков`;
+                    } else if (banner.type === 'weapon') {
+                        totalWeaponPulls += bannerPulls;
+                        totalWeaponLegendaries += bannerLegendaries;
+                        weaponStats = `Оружие: ${bannerAvg.toFixed(1)}/${expectedPulls} крутков`;
+                    } else if (banner.type === 'standard') {
+                        totalStandardPulls += bannerPulls;
+                        totalStandardLegendaries += bannerLegendaries;
+                        standardStats = `Стандарт: ${bannerAvg.toFixed(1)}/${expectedPulls} крутков`;
+                    }
+                }
+            });
+
+            return `
+                <div class="luck-tooltip">
+                    <div class="tooltip-title">Расчет коэффициента удачи</div>
+                    
+                    <div class="tooltip-section">
+                        <div class="tooltip-label">Итоговый скор:</div>
+                        <div class="tooltip-value">${score} баллов</div>
+                    </div>
+                    
+                    <div class="tooltip-section">
+                        <div class="tooltip-label">Надежность:</div>
+                        <div class="tooltip-value">${confidence}% ${uncertainty > 0 ? `(±${uncertainty})` : ''}</div>
+                    </div>
+                    
+                    <div class="tooltip-section">
+                        <div class="tooltip-label">Компоненты:</div>
+                        <div class="tooltip-components">
+                            <div class="tooltip-component">Средние крутки: ${components.avgPulls}</div>
+                            <div class="tooltip-component">Ранние дропы: ${components.early}</div>
+                            <div class="tooltip-component">50/50: ${components.win50_50}</div>
+                            <div class="tooltip-component">Стрики: ${components.streaks}</div>
+                        </div>
+                    </div>
+                    
+                    ${eventStats ? `<div class="tooltip-section"><div class="tooltip-label">${eventStats}</div></div>` : ''}
+                    ${weaponStats ? `<div class="tooltip-section"><div class="tooltip-label">${weaponStats}</div></div>` : ''}
+                    ${standardStats ? `<div class="tooltip-section"><div class="tooltip-label">${standardStats}</div></div>` : ''}
+                    
+                    <div class="tooltip-section">
+                        <div class="tooltip-label">Методология:</div>
+                        <div class="tooltip-value">Z-score + сигмоидная нормализация</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ✅ АКТИВНАЯ ФУНКЦИЯ - ИСПОЛЬЗУЕТСЯ ВЕЗДЕ ✅
         // Новая статистическая функция для расчета коэффициента удачи
+        // ПРЕИМУЩЕСТВА: использует математическое ожидание, z-score статистика, confidence/uncertainty
         function calculateLuckScoreStatistical(game) {
             if (!game.banners || game.banners.length === 0) return { score: 0, confidence: 0, uncertainty: 30 };
             
@@ -2606,7 +2762,10 @@
             };
         }
 
-        // Функция для расчета коэффициента удачи (старая версия для совместимости)
+        // ⚠️ УСТАРЕВШАЯ ФУНКЦИЯ - НЕ ИСПОЛЬЗУЕТСЯ ⚠️
+        // Эта функция оставлена только для обратной совместимости
+        // ПРОБЛЕМЫ: использует гарант как эталон (неправильно), нет статистической обоснованности
+        // ИСПОЛЬЗУЙТЕ: calculateLuckScoreStatistical() - новая статистическая версия
         function calculateLuckScore(game) {
             if (!game.banners || game.banners.length === 0) return 0;
             
@@ -2623,6 +2782,7 @@
             
             const avgLegendary = totalPulls / totalLegendaries;
             
+            // ❌ ПРОБЛЕМА: Использует гарант как эталон (неправильно!)
             // 1. Оценка средней легендарки (вес: 40%)
             // Рассчитываем среднюю легендарку для каждого типа баннера с весами
             let weightedAvgScore = 0;
@@ -2644,6 +2804,7 @@
                         bannerWeight = 0.25; // 25% для оружейного и стандартного
                     }
                     
+                    // ❌ ПРОБЛЕМА: Жесткие границы относительно гаранта (неправильно!)
                     // Рассчитываем границы для конкретного баннера
                     const excellentThreshold = Math.floor(banner.guarantee * 0.55);
                     const goodThreshold = Math.floor(banner.guarantee * 0.68);
@@ -2754,6 +2915,13 @@
             
             const finalScore = totalWeight > 0 ? Math.round(totalScore / totalWeight) : 0;
             
+            // ❌ ПРОБЛЕМЫ ЭТОЙ ФУНКЦИИ:
+            // 1. Гарант ≠ Математическое ожидание (гарант = максимум, ожидание = среднее)
+            // 2. Жесткие границы вместо статистической нормализации
+            // 3. Нет confidence/uncertainty для оценки надежности
+            // 4. Может завышать оценку удачи в 2-3 раза
+            // 
+            // ✅ ИСПОЛЬЗУЙТЕ ВМЕСТО НЕЕ: calculateLuckScoreStatistical()
             return finalScore;
         }
 
@@ -2855,7 +3023,7 @@
             }
 
             saveInterfaceSettings();
-
+            
             if (selectedGames.length === 0) {
                 container.innerHTML = '<div class="no-games"><p>Выберите игры для отображения статистики</p></div>';
                 return;
@@ -2931,6 +3099,7 @@
                                         <div class="confidence-text">Надежность: ${luckData.confidence}%</div>
                                         ${luckData.uncertainty > 0 ? `<div class="uncertainty-text">±${luckData.uncertainty}</div>` : ''}
                                     </div>
+                                    ${generateLuckTooltip(luckData, game)}
                                 </div>
                             ` : ''}
                         <div class="game-actions">
